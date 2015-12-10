@@ -16,12 +16,19 @@ The steps to setup DIM on your computer are:
 
 1. Clone DIM onto your hard drive.
 2. Run the following commands from your command prompt in the root of the project:
-	1. npm install
-	2. bower install
-	3. tsd install
-	4. ionic platform add ios
-	5. ionic platform add android
-	6. ionic setup sass
+	
+>	`npm install`
+
+>	`bower install`
+
+>	`tsd install`
+
+>	`ionic platform add ios`
+
+>	`ionic platform add android`
+
+>	`ionic setup sass`
+	
 3. Run DIM on your device or simulator with ionic.
 
 ### Gulp Tasks
@@ -32,5 +39,8 @@ While writing code, you'll need to execute gulp tasks to verify your modifcation
 	* Transpiles the TypeScript code to ES2015 JavaScript.
 	* Transpiles the ES2015 JavaScript to ES5 JavaScript.
 	* Bundles the Module syntax of ES2015 to SystemJS.
-2. clean:build
-	* Cleans the build folder.
+2. bundle
+	* Calls the build task.
+	* Bundles the files in the /build folder and published them into the /www/js folder.
+3. clean
+	* Cleans the /build folder.

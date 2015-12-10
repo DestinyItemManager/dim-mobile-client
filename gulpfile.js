@@ -7,11 +7,17 @@ var minifyCss = require('gulp-minify-css');
 var rename = require('gulp-rename');
 var sh = require('shelljs');
 
+var ts = require('gulp-typescript');
+var babeljs = require('gulp-babel');
+var annotate = require('gulp-ng-annotate');
+var es = require('event-stream');
+var Builder = require('systemjs-builder');
+
 var paths = {
   sass: ['./scss/**/*.scss']
 };
 
-gulp.task('default', ['sass']);
+gulp.task('default', ['sass', 'bundle']);
 
 gulp.task('sass', function(done) {
   gulp.src('./scss/ionic.app.scss')
