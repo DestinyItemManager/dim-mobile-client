@@ -1,0 +1,13 @@
+{
+  "name": "destiny-item-manager",
+  "app_id": "",
+  "gulpStartupTasks": [
+    "build",
+    "sass",
+    "watch"
+  ],
+  "watchPatterns": [
+    "www/**/*",
+    "!www/lib/**/*"
+  ]
+}
