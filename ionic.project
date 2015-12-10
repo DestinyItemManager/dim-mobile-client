@@ -2,7 +2,7 @@
   "name": "destiny-item-manager",
   "app_id": "",
   "gulpStartupTasks": [
-    "build",
+    "bundle",
     "sass",
     "watch"
   ],

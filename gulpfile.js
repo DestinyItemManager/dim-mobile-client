@@ -71,7 +71,7 @@ gulp.task('bundle', ['build'], function (done) {
     });
 });
 
-gulp.task('sass', function (done) {
+gulp.task('sass', ['clean-css'], function (done) {
   gulp.src('./scss/dim.scss')
     .pipe(sass())
     .on('error', sass.logError)
