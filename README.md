@@ -44,3 +44,13 @@ While writing code, you'll need to execute gulp tasks to verify your modifcation
 	* Bundles the files in the /build folder and published them into the /www/js folder.
 3. clean
 	* Cleans the /build folder.
+	* Cleans the /www/css folder.
+	* There are clean-js and clean-css subtasks.
+3. help
+	* Prints the avilale tasks and sub-tasks in the gulp file.
+4. sass
+	* Builds the css for the application from the /scss files.
+5. watch
+	* Watches the /scss folder for changes and runs the 'sass' task.
+	* Watches the /src folder for changes and runs the 'build' task. 
+	
