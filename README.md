@@ -17,17 +17,17 @@ The steps to setup DIM on your computer are:
 1. Clone DIM onto your hard drive.
 2. Run the following commands from your command prompt in the root of the project:
 	
->	`npm install`
-
->	`bower install`
-
->	`tsd install`
-
->	`ionic platform add ios`
-
->	`ionic platform add android`
-
->	`ionic setup sass`
+	>	`npm install`
+	
+	>	`bower install`
+	
+	>	`tsd install`
+	
+	>	`ionic platform add ios`
+	
+	>	`ionic platform add android`
+	
+	>	`ionic setup sass`
 	
 3. Run DIM on your device or simulator with ionic.
 
