@@ -1,0 +1,2 @@
+"use strict";System.register("app.module.js",[],function(a){function b(a,b){if(!(a instanceof b))throw new TypeError("Cannot call a class as a function")}var c;return{setters:[],execute:function(){c=function a(){b(this,a)}}}});
+//# sourceMappingURL=dim-bundle.js.map
