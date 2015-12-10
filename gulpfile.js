@@ -54,6 +54,9 @@ gulp.task('clean-css', function () {
 
 gulp.task('bundle', ['build'], function (done) {
   var builder = new Builder('build', 'builder.json');
+  
+  gulp.src('./node_modules/babel-polyfill/dist/polyfill.min.js')
+    .pipe(gulp.dest('./www/js'));
 
   builder
     .bundle('app.module.js', 'www/js/dim-bundle.js', {
