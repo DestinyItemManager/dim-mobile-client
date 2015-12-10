@@ -8,4 +8,5 @@ build/
 node_modules/
 platforms/
 plugins/
+typings/
 www/lib/
