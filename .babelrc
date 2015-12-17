@@ -4,8 +4,7 @@
   ],
   "plugins": [
     "syntax-async-functions",
-    "transform-regenerator",
-    //"transform-runtime",
-    "transform-es2015-modules-systemjs"
+    "transform-regenerator"
+    //"transform-es2015-modules-systemjs"
   ]
 }
