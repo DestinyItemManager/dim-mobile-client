@@ -3,5 +3,19 @@
     "target": "ES6",
     "experimentalAsyncFunctions": true
   },
-  "compileOnSave": false
+  "compileOnSave": false,
+  "filesGlob": [
+    "./src/**/*.ts"
+  ],
+  "files": [
+    "./src/app.config.ts",
+    "./src/app.module.ts",
+    "./src/app.run.ts",
+    "./src/bootstrap.ts",
+    "./src/bungie/bungie.module.ts",
+    "./src/bungie/destinyService.ts"
+  ],
+  "atom": {
+    "rewriteTsconfig": true
+  }
 }

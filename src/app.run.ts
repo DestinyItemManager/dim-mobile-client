@@ -5,8 +5,14 @@
 
 runIonicPlatfrom.$inject = ['$ionicPlatform', '$cordovaSplashscreen'];
 
-function runIonicPlatfrom($ionicPlatform: ionic.platform.IonicPlatformService, $cordovaSplashscreen) {
+function runIonicPlatfrom($ionicPlatform: ionic.platform.IonicPlatformService, $timeout: ng.ITimeoutService, $cordovaSplashscreen) {
   $ionicPlatform.ready(function() {
+    if (window.cordova) {
+      setTimeout(function() {
+        $cordovaSplashscreen.hide();
+      }, 1000);
+    }
+
     if (window.cordova && window.cordova.plugins.Keyboard) {
       cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
       cordova.plugins.Keyboard.disableScroll(true);
@@ -16,10 +22,6 @@ function runIonicPlatfrom($ionicPlatform: ionic.platform.IonicPlatformService, $
       window.StatusBar.styleDefault();
     }
   });
-
-  setTimeout(function() {
-    $cordovaSplashscreen.hide();
-  }, 1000);
 }
 
 export default runIonicPlatfrom;
