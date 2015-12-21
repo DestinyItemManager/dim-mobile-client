@@ -2,7 +2,8 @@ export default function appConfig($stateProvider, $urlRouterProvider) {
   $stateProvider
     .state('app', {
       url: '/app',
-      abstract: true
+      abstract: true,
+      controller: 'dimAppCtrl as app'
     })
     .state('app.items', {
       url: '/items',

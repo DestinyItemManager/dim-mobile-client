@@ -8,6 +8,7 @@ platforms/
 plugins/
 www/lib/
 www/js/
+src/**/*.js
 
 www/css/dim.*
 

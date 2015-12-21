@@ -1,6 +1,7 @@
 /// <reference path="../typings/angularjs/angular.d.ts" />
 
-import bungieModule from './bungie/bungie.module'
+import authModule from './auth/auth.module'
+import shellModule from './shell/shell.module'
 import runFn from './app.run'
 import configFn from './app.config'
 
@@ -8,7 +9,8 @@ let app = angular.module('starter',
   [
     'ionic',
     'ngCordova',
-    bungieModule
+    authModule,
+    shellModule
   ])
   .run(runFn)
   .config(configFn);

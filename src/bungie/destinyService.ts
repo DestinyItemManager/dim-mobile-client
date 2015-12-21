@@ -12,7 +12,8 @@ export default class DestinyService implements IDestinyService {
   private $http: ng.IHttpService;
   private $q: ng.IQService;
 
-  "ngInject";
+  static $inject = ['$http', '$q'];
+
   constructor($http: ng.IHttpService, $q: ng.IQService) {
     this.$http = $http;
     this.$q = $q;

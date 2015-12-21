@@ -7,13 +7,6 @@ runIonicPlatfrom.$inject = ['$ionicPlatform', '$timeout', '$cordovaSplashscreen'
 
 function runIonicPlatfrom($ionicPlatform: ionic.platform.IonicPlatformService, $timeout: ng.ITimeoutService, $cordovaSplashscreen) {
   $ionicPlatform.ready(function() {
-    // Hides splash screen
-    if (window.cordova) {
-      setTimeout(function() {
-        $cordovaSplashscreen.hide();
-      }, 1000);
-    }
-
     if (window.cordova && window.cordova.plugins.Keyboard) {
       cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
       cordova.plugins.Keyboard.disableScroll(true);
