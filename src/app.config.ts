@@ -2,8 +2,13 @@ export default function appConfig($stateProvider, $urlRouterProvider) {
   $stateProvider
     .state('app', {
       url: '/app',
-      templateUrl: 'templates/menu.html'
+      abstract: true
     })
+    .state('app.items', {
+      url: '/items',
+      templateUrl: 'templates/items.html'
+    });
+
   // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/app');
+  $urlRouterProvider.otherwise('/app/items');
 }

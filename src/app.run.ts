@@ -3,10 +3,11 @@
 /// <reference path="../typings/cordova/cordova.d.ts" />
 /// <reference path="../typings/cordova-ionic/cordova-ionic.d.ts" />
 
-runIonicPlatfrom.$inject = ['$ionicPlatform', '$cordovaSplashscreen'];
+runIonicPlatfrom.$inject = ['$ionicPlatform', '$timeout', '$cordovaSplashscreen'];
 
 function runIonicPlatfrom($ionicPlatform: ionic.platform.IonicPlatformService, $timeout: ng.ITimeoutService, $cordovaSplashscreen) {
   $ionicPlatform.ready(function() {
+    // Hides splash screen
     if (window.cordova) {
       setTimeout(function() {
         $cordovaSplashscreen.hide();

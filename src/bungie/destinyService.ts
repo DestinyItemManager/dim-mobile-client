@@ -3,7 +3,7 @@
 interface IDestinyService {
   getBungieNetUser(): ng.IPromise<any>;
   getMembershipId(platform: any, platformUserId: any): ng.IPromise<any>;
-  getAccount(membershipId: any): ng.IPromise<any>;
+  getAccountDetails(membershipId: any): ng.IPromise<any>;
   getCharacterInventory(membershipId: any, characterId: any): ng.IPromise<any>;
   getAccountVault(platform: any): ng.IPromise<any>;
 }
@@ -26,7 +26,7 @@ export default class DestinyService implements IDestinyService {
     return this.$q.when(null);
   }
 
-  getAccount(membershipId: any) {
+  getAccountDetails(membershipId: any) {
     return this.$q.when(null);
   }
 
@@ -34,7 +34,7 @@ export default class DestinyService implements IDestinyService {
     return this.$q.when(null);
   }
 
-  getAccountVault(getAccountVault: any) {
+  getAccountVault(platform: any) {
     return this.$q.when(null);
   }
 };
