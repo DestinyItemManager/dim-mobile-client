@@ -40,7 +40,7 @@ export default class AuthorizationService {
           this._rootScope["returnToStateParams"] = this._rootScope["toStateParams"];
 
           this._timeout(() => {
-            this._state.go("signin");
+            //this._state.go("signin");
           }, 0);
         }
       }

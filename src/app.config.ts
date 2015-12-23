@@ -7,10 +7,10 @@ export default function appConfig($stateProvider: angular.ui.IStateProvider, $ur
 
   $stateProvider
     .state("root", {
-      abstract: true,
       url: "",
+      abstract: true,
       template: "<ion-nav-view></ion-nav-view>",
-      // controller: "dimAppCtrl as app",
+      controller: "dimAppCtrl as app",
       resolve: {
         authorize: ["dimAuthorizationService",
           function(authorization) {
@@ -19,13 +19,22 @@ export default function appConfig($stateProvider: angular.ui.IStateProvider, $ur
         ]
       }
     })
+    .state("menu", {
+      url: "",
+      abstract: true,
+      templateUrl: "templates/shell-menu.html",
+    })
     .state("items", {
-      parent: "root",
+      parent: "menu",
       url: "/items",
       data: {
         roles: ['Guardian']
       },
-      templateUrl: "templates/items.html"
+      views: {
+        'menuContent': {
+          templateUrl: 'templates/items.html'
+        }
+      }
     })
     .state("signin", {
       parent: "root",
@@ -33,10 +42,11 @@ export default function appConfig($stateProvider: angular.ui.IStateProvider, $ur
       data: {
         roles: []
       },
-      template: `<ion-view view-title="Sign In">
-        <ion-content>
-          <h1>Sign In</h1>
-        </ion-content>
-      </ion-view>`
+      templateUrl: 'templates/signin.html'
+      // views: {
+      //   'menuContent': {
+      //     templateUrl: 'templates/signin.html'
+      //   }
+      // }
     });
 }
