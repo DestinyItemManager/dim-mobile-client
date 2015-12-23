@@ -11,7 +11,7 @@ export default class DimPrinciple implements IPrinciple {
   private _authenticated: boolean;
   private _identity: IIdentity;
 
-  static $inject = ['$http', '$q'];
+  static $inject = ["$http", "$q"];
 
   constructor($http: ng.IHttpService, $q: ng.IQService) {
     this._http = $http;
@@ -32,7 +32,8 @@ export default class DimPrinciple implements IPrinciple {
     return this._q.when(this._identity);
   }
 
-  public async authenticate(identity: IIdentity) {
+  public async authenticate(cookie?: string) {
+    this._identity = new BungieIdentity(this._q, cookie);
     return await this._identity.authenticate();
   }
 

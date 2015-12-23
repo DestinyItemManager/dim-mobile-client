@@ -7,7 +7,7 @@ export default class DestinyService implements IDestinyService {
   private _http: ng.IHttpService;
   private _q: ng.IQService;
 
-  static $inject = ['$http', '$q'];
+  static $inject = ["$http", "$q"];
 
   constructor($http: ng.IHttpService, $q: ng.IQService) {
     this._http = $http;
@@ -33,4 +33,4 @@ export default class DestinyService implements IDestinyService {
   getAccountVault(platform: any): ng.IPromise<any> {
     return this._q.when(null);
   }
-};
+}; 

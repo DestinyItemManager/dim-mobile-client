@@ -4,7 +4,7 @@ class BungieIdentity implements IIdentity {
   private _q: ng.IQService;
   private _cookie: string;
 
-  static $inject = ['$q'];
+  static $inject = ["$q"];
 
   constructor($q: ng.IQService, cookie: string) {
     this._q = $q;
