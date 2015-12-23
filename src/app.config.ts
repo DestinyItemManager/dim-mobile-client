@@ -20,6 +20,7 @@ export default function appConfig($stateProvider: angular.ui.IStateProvider, $ur
       }
     })
     .state("menu", {
+      parent: "root",
       url: "",
       abstract: true,
       templateUrl: "templates/shell-menu.html",
