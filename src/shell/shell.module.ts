@@ -2,6 +2,7 @@
 
 import bungieModule from '../bungie/bungie.module'
 import appCtrl from './app.controller';
+import signinCtrl from './signin.controller';
 
 let moduleName = 'dimShell';
 
@@ -10,6 +11,7 @@ angular.module(moduleName, [
     'ngCordova',
     bungieModule
   ])
-  .controller('dimAppCtrl', appCtrl);
+  .controller('dimAppCtrl', appCtrl)
+  .controller('dimSigninCtrl', signinCtrl);
 
 export default moduleName;

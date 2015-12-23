@@ -1,19 +1,30 @@
 import IIdentity from "./IIdentity";
 
 class BungieIdentity implements IIdentity {
-  private _q: any; // WeakMap<IPrinciple, ng.IQService>
+  private _q: ng.IQService;
+  private _cookie: string;
 
-  constructor($q: ng.IQService) {
-    this._q.set(this, $q);
+  static $inject = ['$q'];
 
+  constructor($q: ng.IQService, cookie: string) {
+    this._q = $q;
+    this._cookie = cookie;
   }
 
-  login(): ng.IPromise<any> {
-    return this._q.get(this).when(null);
+  public authenticate(): ng.IPromise<any> {
+    return this._q.when(null);
   }
 
-  logout(): ng.IPromise<any> {
-    return this._q.get(this).when(null);
+  public deauthenticate(): ng.IPromise<any> {
+    return this._q.when(null);
+  }
+
+  public get cookie(): ng.IPromise<any> {
+    if (angular.isDefined(this._cookie)) {
+      return this._q.when(this._cookie);
+    } else {
+      return this._q.when(null);
+    }
   }
 }
 

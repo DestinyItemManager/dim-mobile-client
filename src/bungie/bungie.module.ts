@@ -1,8 +1,10 @@
-import destinyService from './destinyService';
+/// <reference path="../../typings/angularjs/angular.d.ts" />
+
+import destinyService from './destinyService.service';
 
 let moduleName = 'dimBungie';
 
 angular.module(moduleName, [])
-  .factory('dimDestinyService', destinyService);
+  .service('dimDestinyService', destinyService);
 
 export default moduleName;

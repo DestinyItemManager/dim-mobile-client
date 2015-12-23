@@ -1,15 +1,27 @@
-export default function appConfig($stateProvider, $urlRouterProvider) {
+/// <reference path="../typings/angular-ui-router/angular-ui-router.d.ts" />
+
+export default function appConfig($stateProvider: angular.ui.IStateProvider, $urlRouterProvider: angular.ui.IUrlRouterProvider) {
+  // if none of the above states are matched, use this as the fallback
+  $urlRouterProvider.otherwise('/items');
+
   $stateProvider
-    .state('app', {
-      url: '/app',
+    .state('root', {
       abstract: true,
-      controller: 'dimAppCtrl as app'
+      controller: 'dimAppCtrl as app',
+      resolve: {
+        authorize: ['authorization',
+          function(authorization) {
+            return authorization.authorize();
+          }
+        ]
+      }
     })
-    .state('app.items', {
+    .state('root.items', {
       url: '/items',
       templateUrl: 'templates/items.html'
+    })
+    .state('root.signin', {
+      url: '/signin',
+      templateUrl: 'templates/signin.html'
     });
-
-  // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/app/items');
 }

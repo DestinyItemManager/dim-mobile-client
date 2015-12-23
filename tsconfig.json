@@ -9,14 +9,17 @@
     "./src/app.module.ts",
     "./src/app.run.ts",
     "./src/auth/auth.module.ts",
+    "./src/auth/authorizationService.service.ts",
+    "./src/auth/dimPrinciple.ts",
     "./src/auth/IIdentity.ts",
     "./src/auth/IPrinciple.ts",
-    "./src/auth/Principle.ts",
-    "./src/auth/BungieIdentity.ts",
+    "./src/auth/bungieIdentity.ts",
     "./src/bootstrap.ts",
     "./src/bungie/bungie.module.ts",
-    "./src/bungie/destinyService.ts",
+    "./src/bungie/IDestinyService.ts",
+    "./src/bungie/destinyService.service.ts",
     "./src/shell/app.controller.ts",
+    "./src/shell/signin.controller.ts",
     "./src/shell/shell.module.ts"
   ]
 }

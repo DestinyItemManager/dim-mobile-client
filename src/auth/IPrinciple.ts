@@ -1,8 +1,11 @@
 import IIdentity from "./IIdentity";
 
 interface IPrinciple {
-  isAuthenticated(): boolean;
-  getIdentity(): IIdentity;
+  hasIdentity: boolean;
+  isAuthenticated: boolean;
+  identity: ng.IPromise<IIdentity>;
+  authenticate(IIdentity): any;
+  deauthenticate(): any;
 }
 
 export default IPrinciple;
