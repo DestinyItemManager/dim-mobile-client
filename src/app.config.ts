@@ -40,6 +40,7 @@ export default function appConfig($stateProvider: angular.ui.IStateProvider, $ur
     .state("signin", {
       parent: "root",
       url: "/signin",
+      controller: "dimSigninCtrl as vm",
       data: {
         roles: []
       },

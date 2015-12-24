@@ -1,8 +1,8 @@
 /// <reference path="../../typings/angularjs/angular.d.ts" />
 
 import bungieModule from "../bungie/bungie.module"
-import appCtrl from "./app.controller";
-import signinCtrl from "./signin.controller";
+import AppCtrl from "./app.controller";
+import SigninCtrl from "./signin.controller";
 
 let moduleName = "dimShell";
 
@@ -11,7 +11,7 @@ angular.module(moduleName, [
     "ngCordova",
     bungieModule
   ])
-  .controller("dimAppCtrl", appCtrl)
-  .controller("dimSigninCtrl", signinCtrl);
+  .controller("dimAppCtrl", AppCtrl)
+  .controller("dimSigninCtrl", SigninCtrl);
 
 export default moduleName;

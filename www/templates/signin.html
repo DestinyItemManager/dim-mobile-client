@@ -1,12 +1,24 @@
 <ion-view view-title="Sign In">
   <ion-header-bar>
-    <h1 class="title">Login</h1>
-    <div class="buttons">
+    <h1 class="title">Sign In</h1>
+    <!-- <div class="buttons">
       <button class="button button-clear" ng-click="closeLogin()">Close</button>
-    </div>
+    </div> -->
   </ion-header-bar>
-  <ion-content>
-    <form ng-submit="doLogin()">
+  <ion-content padding="true">
+    <p>Please sign into Bungie.net.</p>
+
+    <div style="text-align: center">
+      <div><a href="" ng-click="vm.signIn('psn')">Playstation Network</a></div>
+      <div><a href="" ng-click="vm.signIn('xbl')">Xbox Live</a></div>
+    </div>
+
+    <p>DIM does not use or store your Playstation Network or Xbox Live credentials.</p>
+
+    <p>You'll be redirected to a page on Bungie.net to authenticate with your credentials.  When you have signed in, you'll be returned to DIM.</p>
+
+    <div><a href="">How does authentication work?</a></div>
+    <!-- <form ng-submit="doLogin()">
       <div class="list">
         <label class="item item-input">
           <span class="input-label">Username</span>
@@ -20,6 +32,6 @@
           <button class="button button-block button-positive" type="submit">Log in</button>
         </label>
       </div>
-    </form>
+    </form> -->
   </ion-content>
 </ion-view>

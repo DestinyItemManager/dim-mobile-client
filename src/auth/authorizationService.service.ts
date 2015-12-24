@@ -34,7 +34,8 @@ export default class AuthorizationService {
     return this._q((resolve, reject) => {
       let authenticated = this._principal.isAuthenticated;
 
-      if (angular.isDefined(this._rootScope["toState"].data.roles) && (this._rootScope["toState"].data.roles.length > 0)) {
+      if (angular.isDefined(this._rootScope["toState"].data.roles) &&
+        (this._rootScope["toState"].data.roles.length > 0)) {
         if (!authenticated) {
           this._rootScope["returnToState"] = this._rootScope["toState"];
           this._rootScope["returnToStateParams"] = this._rootScope["toStateParams"];

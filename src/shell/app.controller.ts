@@ -6,7 +6,6 @@ export default class AppCtrl {
   constructor($ionicPlatform: ionic.platform.IonicPlatformService, $cordovaSplashscreen: any) {
     $ionicPlatform.ready(function() {
       // Hides splash screen
-      debugger;
       if (window.cordova) {
         setTimeout(function() {
           $cordovaSplashscreen.hide();
