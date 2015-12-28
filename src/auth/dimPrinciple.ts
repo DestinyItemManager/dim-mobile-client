@@ -32,12 +32,16 @@ export default class DimPrinciple implements IPrinciple {
     return this._q.when(this._identity);
   }
 
-  public async authenticate(cookie?: string) {
-    this._identity = new BungieIdentity(this._q, cookie);
-    return await this._identity.authenticate();
+  public async authenticate(token?: string) {
+    // this._identity = new BungieIdentity(this._http, this._q, this._apikey, token);
+    // return await this._identity.authenticate();
   }
 
   public async deauthenticate() {
-    return await this._identity.deauthenticate();
+    // return await this._identity.deauthenticate();
+  }
+
+  private getCookie(): ng.IPromise<string> {
+    return this._q.when("");
   }
 };

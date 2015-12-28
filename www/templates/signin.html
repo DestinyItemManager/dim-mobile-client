@@ -1,9 +1,9 @@
 <ion-view view-title="Sign In">
   <ion-header-bar>
     <h1 class="title">Sign In</h1>
-    <!-- <div class="buttons">
+    <div class="buttons" ng-if="vm.tracker.active()">
       <button class="button button-clear" ng-click="closeLogin()">Close</button>
-    </div> -->
+    </div>
   </ion-header-bar>
   <ion-content padding="true">
     <p>Please sign into Bungie.net.</p>
@@ -12,6 +12,10 @@
       <div><a href="" ng-click="vm.signIn('psn')">Playstation Network</a></div>
       <div><a href="" ng-click="vm.signIn('xbl')">Xbox Live</a></div>
     </div>
+
+    <div style="text-align: center">
+    <div><a href="" ng-click="vm.signOut()">Sign Out</a></div>
+  </div>
 
     <p>DIM does not use or store your Playstation Network or Xbox Live credentials.</p>
 

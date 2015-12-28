@@ -14,12 +14,16 @@
     "./src/auth/IIdentity.ts",
     "./src/auth/IPrinciple.ts",
     "./src/auth/bungieIdentity.ts",
+    "./src/settings/settings.module.ts",
+    "./src/settings/settingsService.service.ts",
     "./src/bootstrap.ts",
     "./src/bungie/bungie.module.ts",
     "./src/bungie/IDestinyService.ts",
     "./src/bungie/destinyService.service.ts",
     "./src/shell/app.controller.ts",
     "./src/shell/signin.controller.ts",
-    "./src/shell/shell.module.ts"
+    "./src/shell/shell.module.ts",
+    "./src/utility/utility.module.ts",
+    "./src/utility/promiseTracker.service.ts"
   ]
 }

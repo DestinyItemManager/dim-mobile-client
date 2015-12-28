@@ -1,98 +1,162 @@
 /// <reference path="../../typings/angularjs/angular.d.ts" />
+/// <reference path="../../typings/lodash/lodash.d.ts"/>
+
+import AuthorizationService from "../auth/authorizationService.service";
 
 export default class SigninCtrl {
-  private _q: ng.IQService;
   private _http: ng.IHttpService;
+  private _q: ng.IQService;
+  private _log: ng.ILogService;
   private _cookieString: string;
   private _apiKey: string;
+  private _auth: AuthorizationService;
+  private _token: string;
 
-  static $inject = ['$q', '$http'];
+  public tracker: any;
 
-  constructor($q: ng.IQService, $http: ng.IHttpService) {
-    this._q = $q;
+  static $inject = ['$http', '$q', '$log', 'dimAuthorizationService', 'dimPromiseTracker'];
+
+  constructor($http: ng.IHttpService, $q: ng.IQService, $log: ng.ILogService, authorization: AuthorizationService, tracker: any) {
     this._http = $http;
+    this._q = $q;
+    this._log = $log;
     this._apiKey = "57c5ff5864634503a0340ffdfbeb20c0";
+    this._auth = authorization;
+    this._token = "";
+
+    this.tracker = tracker;
+
+    this.init();
   }
 
-  public async signIn(platform: string) {
-    let cookie = await this.getCookieFromPlatform(platform);
-
-    if (cookie !== "") {
-      window.alert("found user.");
-    }
-
-    return await this.showLogin(platform, cookie);
-  }
-
-  private readCookie(cname) {
-    //tgd.localLog("trying to read cookie passed " + savedCookie);
-    var name = cname + "=";
-    var ca = (this._cookieString || "").toString().split(';');
-    for (var i = 0; i < ca.length; i++) {
-      var c = ca[i];
-      while (c.charAt(0) == ' ') c = c.substring(1);
-      if (c.indexOf(name) === 0) return c.substring(name.length, c.length);
-    }
-    //tgd.localLog("found no match");
-    return "";
-  }
-
-  private showLogin(platform: string, cookie: string): ng.IPromise<string> {
+  private init(): void {
+    let token:string = "";
     let self = this;
 
+    var promise = this._q(async function(resolve, reject) {
+      try {
+        let token = await self._auth.getBungieNetToken();
+      } catch(e) {
+        this._log.error('Unable to get bungie token.');
+        return;
+      }
+
+      let isTokenValid = await self._auth.testToken(token);
+
+      // TODO If token is found and the token is valid, then redriect back to the
+      // initial page or the items page.
+
+      resolve(null);
+    });
+
+    this.tracker.addPromise(promise);
+  }
+
+  public async signOut(): Promise<any> {
     return this._q((resolve, reject) => {
-      let browserRef = window.open('https://www.bungie.net/en/User/SignIn/Xuid', '_blank', 'location=yes');
+      let browserRef = window.open('https://www.bungie.net/en/User/SignOut/', '_blank', 'location=yes');
 
       browserRef.addEventListener('loadstop', function(event) {
         browserRef.close();
-
-        let request: ng.IRequestConfig = {
-          method: 'GET',
-          url: 'https://www.bungie.net/Platform/User/GetBungieNetUser/',
-          headers: {
-            'X-API-Key': self._apiKey,
-            'x-csrf': cookie
-          },
-          withCredentials: true
-        };
-
-        resolve(self._http(request).then(function(result) {
-          window.alert(JSON.stringify(result.data["ErrorCode"]));
-        }));
+        resolve();
       });
     });
   }
 
-  private getCookieFromPlatform(platform: string): ng.IPromise<string> {
-    let self = this;
-    return this._q((resolve, reject) => {
-      let browserRef = window.open('https://www.bungie.net/help', '_blank', 'location=no,hidden=yes');
-      //let browserRef = window.open('https://www.bungie.net/help', '_blank', 'location=yes');
-      //let browserRef = window.open('https://www.bungie.net/help', '_self');
+  public signIn(platform: string) {
+    this.tracker.addPromise(this._q.when(this.showLogin(platform)));
+  }
 
+  private async showLogin(platform: string): Promise<{}> {
+    let self = this;
+
+    return this._q((resolve, reject) => {
+      let browserRef = window.open('https://www.bungie.net/en/User/SignIn/Xuid', '_blank', 'location=yes,hidden=yes');
+
+      // If the loaded page has the 'bungled' header, then the user is
+      // authenticated.  If the loaded page does not have a 'bungled' header,
+      // then we're on a platform sign in page.
+
+      // It is assumed that the init() function checks for a 'bungled' header
+      // so if we have a 'bungled' header when we open this page, then the user
+      // must be authenticated, so we can attempt a test.
+
+      var deferedLoadstop = self._q.defer();
+      var deferedExit = self._q.defer();
+
+      var results = [deferedLoadstop.promise, deferedExit.promise];
+
+      // Test every page load for the 'bungled' header.
       browserRef.addEventListener('loadstop', function (event) {
+        alert("loadstop");
         try {
           browserRef.executeScript({
             code: 'document.cookie'
-          }, function (result) {
-            if ((result || "").toString().indexOf("bungled") > -1) {
-              alert(result.toString());
-              self._cookieString = result.toString();
-              alert(self.readCookie.bind(self)("bungled"));
-              browserRef.close();
-              resolve(self.readCookie.bind(self)("bungled"));
+          }, async function r(result) {
+            let token = self._auth.getCookieFromBrowserReference.bind(self, result)();
+
+            if (token === "") {
+              alert("loadstop - no token");
+              browserRef.show();
+              deferedLoadstop.resolve();
             } else {
-              alert("");
+              alert("loadstop - found token");
               browserRef.close();
-              resolve("");
+
+              alert(await self._auth.testToken(token));
+              deferedLoadstop.resolve();
             }
           });
         } catch (e) {
           console.log(e);
-          browserRef.close();
           reject(e.toString());
+          deferedLoadstop.resolve();
         }
+
+        // try {
+        //   browserRef.executeScript({
+        //     code: 'document.cookie'
+        //   }, (result) => {
+        //     resolve(self._auth.getCookieFromBrowserReference.bind(self, result)());
+        //   });
+        // } catch (e) {
+        //   console.log(e);
+        //   browserRef.close();
+        //   reject(e.toString());
+        // }
       });
+
+      // Test closed window for the 'bungled' header.
+      browserRef.addEventListener('exit', (event) => {
+        alert("exit");
+
+        deferedExit.resolve();
+      });
+
+      resolve(self._q.all(results).then(function() {
+  alert("end promise.");
+  browserRef.close();
+}));
+
+      // browserRef.addEventListener('loadstop', function(event) {
+      //   browserRef.close();
+      //
+      //   let request: ng.IRequestConfig = {
+      //     method: 'GET',
+      //     url: 'https://www.bungie.net/Platform/User/GetBungieNetUser/',
+      //     headers: {
+      //       'X-API-Key': self._apiKey,
+      //       'x-csrf': self._token
+      //     },
+      //     withCredentials: true
+      //   };
+      //
+      //   resolve(self._http(request).then(function(result) {
+      //     window.alert(JSON.stringify(result.data["ErrorCode"]));
+      //
+      //     resolve();
+      //   }));
+      // });
     });
   }
 };

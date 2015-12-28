@@ -1,6 +1,12 @@
+/// <reference path="../typings/angularjs/angular.d.ts"/>
 /// <reference path="../typings/angular-ui-router/angular-ui-router.d.ts" />
 
-export default function appConfig($stateProvider: angular.ui.IStateProvider, $urlRouterProvider: angular.ui.IUrlRouterProvider) {
+export default function appConfig(
+  $stateProvider: angular.ui.IStateProvider,
+  $urlRouterProvider: angular.ui.IUrlRouterProvider,
+  $logProvider: ng.ILogProvider) {
+
+  $logProvider.debugEnabled(true);
 
   // if none of the above states are matched, use this as the fallback
   $urlRouterProvider.otherwise("/items");

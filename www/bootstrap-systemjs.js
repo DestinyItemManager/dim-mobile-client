@@ -1,6 +1,10 @@
 System.config({
   baseURL: '/js',
-  defaultJSExtensions: true,
+  defaultJSExtensions: true
 });
+window.cookieLib = null;
 
-System.import('./js/bootstrap');
+System.import('./lib/cookie/index').then(function(result) {
+  window.cookieManager = result;
+  System.import('./js/bootstrap');
+});
