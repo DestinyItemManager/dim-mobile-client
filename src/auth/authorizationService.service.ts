@@ -12,11 +12,14 @@ export default class AuthorizationService {
   private _state: angular.ui.IStateService;
   private _timeout: ng.ITimeoutService;
   private _principal: IPrinciple;
+  private _tracker: any;
+  private _cookieParser: any;
+
+  private _apikey: string;
   private _returnToState: any;
   private _returnToStateParams: any;
-  private _apikey: string;
 
-  static $inject = ["$http", "$q", "$log", "$rootScope", "$state", '$timeout', "dimPrinciple"];
+  static $inject = ["$http", "$q", "$log", "$rootScope", "$state", '$timeout', "dimPrinciple", "dimPromiseTracker", "dimCookieParser"];
 
   constructor(
     $http: ng.IHttpService,
@@ -25,7 +28,9 @@ export default class AuthorizationService {
     $rootScope: ng.IRootScopeService,
     $state: angular.ui.IStateService,
     $timeout: ng.ITimeoutService,
-    dimPrinciple: IPrinciple) {
+    principle: IPrinciple,
+    tracker: any,
+    cookieParser: any) {
 
     this._http = $http;
     this._q = $q;
@@ -33,99 +38,128 @@ export default class AuthorizationService {
     this._rootScope = $rootScope;
     this._state = $state;
     this._timeout = $timeout;
-    this._principal = dimPrinciple;
+    this._principal = principle;
+    this._tracker = tracker;
+    this._cookieParser = cookieParser;
+
     this._returnToState = undefined;
     this._apikey = "57c5ff5864634503a0340ffdfbeb20c0";
-  }
-
-  public getCookieFromBrowserReference(result: any): string {
-    this._log.debug(result);
-
-    if ((result || "").toString().indexOf("bungled") > -1) {
-      if (_.isArray(result) && _.size(result) > 0) {
-        return result[0];
-      } else if (_.isString(result)) {
-        return result;
-      } else {
-        return "";
-      }
-    } else {
-      return "";
-    }
   }
 
   getLocalToken(): ng.IPromise<string> {
     return this._q.when("");
   }
 
-  getBungieNetToken(): ng.IPromise<string> {
-    let self = this;
+  public getTokenFromCookie(cookie: string): string {
+    let cookieObj = this._cookieParser.parse(cookie);
 
-    return this._q((resolve, reject) => {
-      // Lightweight endpoint on Bungie.net to get an http response.
-      let browserRef = window.open('https://www.bungie.net/help', '_blank', 'location=no,hidden=yes');
+    if (_.has(cookieObj, "bungled")) {
+      return cookieObj["bungled"];
+    } else {
+      return "";
+    }
+  }
 
-      let loadListener = browserRef.addEventListener('loadstop', function (event) {
-        try {
-          browserRef.executeScript({
-            code: 'document.cookie'
-          }, (result) => {
-            resolve(self.getCookieFromBrowserReference.bind(self, result)());
-            browserRef.removeEventListener('loadstop', () => {});
-            browserRef.close();
-          });
-        } catch (e) {
-          console.log(e);
-          browserRef.removeEventListener('loadstop', () => {});
-          browserRef.close();
-          reject(e.toString());
+  public getCookieFromReference(ref: any): ng.IPromise<string> {
+    return this._q(function(resolve, reject) {
+      ref.executeScript({
+        code: "document.cookie"
+      }, (result) => {
+        console.log(result);
+        if ((result || "").toString().indexOf("bungled") > -1) {
+          if (_.isArray(result) && _.size(result) > 0) {
+            resolve(result[0]);
+            return ;
+          } else if (_.isString(result)) {
+            resolve(result);
+          } else {
+            resolve("");
+          }
+        } else {
+          resolve("");
         }
       });
-    })
-    .then(function(result) {
-      let cookieObj = window["cookieManager"].parse(result);
+    });
+  }
 
-      if (_.has(cookieObj, "bungled")) {
-        return cookieObj["bungled"];
-      }
+  public getBungieNetToken(): ng.IPromise<string> {
+    this._log.info("Getting token from bungie.net");
 
-      return "";
+    let self = this;
+    let promise = this._q((resolve, reject) => {
+      self._log.info("Loading lightweight endpoint from bungie.net");
+
+      // Lightweight endpoint on Bungie.net to get an http response.
+      let ref = window.open('https://www.bungie.net/help', '_blank', 'location=no,hidden=yes');
+
+      ref.addEventListener('loadstop', async function(event) {
+        self._log.debug(event);
+
+        try {
+          let token = await self.getCookieFromReference.bind(self, ref)();
+          resolve(token);
+        } catch (e) {
+          let msg = "There was an error while trying to access the token from Bungie.net.";
+          self._log.error(msg, e);
+          reject(new Error(msg));
+        } finally {
+          ref.close();
+        }
+      });
+
+      ref.addEventListener('loaderror', function(event) {
+        self._log.debug(event);
+
+        let msg = "There was an error loading a page from Bungie.net.";
+
+        self._log.error(msg, event);
+        ref.close();
+        reject(new Error(msg));
+      });
     })
-    .catch(function(error) {
+    .then(this.getTokenFromCookie.bind(self))
+    .catch((error) => {
       console.log(error);
 
       return "";
     });
+
+    return promise;
   }
 
-  public testToken(token: string): ng.IPromise<boolean> {
-    let self = this;
+  public async IsTokenValid(token: string): Promise<boolean> {
+    let request: ng.IRequestConfig;
+    let result: ng.IHttpPromiseCallbackArg<any>;
+    let isValid = false;
 
-    return this._q(function(resolve, reject) {
-      let request: ng.IRequestConfig = {
-        method: 'GET',
-        url: 'https://www.bungie.net/Platform/User/GetBungieNetUser/',
-        headers: {
-          'X-API-Key': self._apikey,
-          'x-csrf': token
-        },
-        withCredentials: true
-      };
+    this._log.info("Testing token to see if it can get data from Bungie.net.");
 
-      var promise = self._http(request)
-        .then(function(result) {
-          console.log(result);
-          return result.data["ErrorCode"] === 1;
-        });
+    request = {
+      method: 'GET',
+      url: 'https://www.bungie.net/Platform/User/GetBungieNetUser/',
+      headers: {
+        'X-API-Key': this._apikey,
+        'x-csrf': token
+      },
+      withCredentials: true
+    };
 
-      resolve(promise);
-    });
+    try {
+      result = await this._http(request);
+      isValid = (<any>result.data).ErrorCode === 1;
+    } catch (e) {
+      this._log.error("The token validation request failed", e, request, result);
+      isValid = false;
+    }
+
+    return isValid;
   }
 
   authorize(): ng.IPromise<any> {
     // Checks for an authenticated identity.  If there is none, the user is
     // redirected to sign in to resolve a user.
-    return this._q((resolve, reject) => {
+
+    let promise = this._q((resolve, reject) => {
       let authenticated = this._principal.isAuthenticated;
 
       if (!authenticated) {
@@ -139,5 +173,9 @@ export default class AuthorizationService {
 
       resolve();
     });
+
+    this._tracker.addPromise(promise);
+
+    return promise;
   }
 };

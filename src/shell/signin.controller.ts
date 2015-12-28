@@ -26,38 +26,36 @@ export default class SigninCtrl {
 
     this.tracker = tracker;
 
-    this.init();
+    this.tracker.addPromise(this.init());
   }
 
-  private init(): void {
+  private async init(): Promise<void> {
     let token:string = "";
-    let self = this;
 
-    var promise = this._q(async function(resolve, reject) {
-      try {
-        let token = await self._auth.getBungieNetToken();
-      } catch(e) {
-        this._log.error('Unable to get bungie token.');
-        return;
-      }
+    try {
+      token = await this._auth.getBungieNetToken();
+    } catch (e) {
+      let msg = "Unable to get bungie token.";
+      this._log.error(msg, e);
+      throw new Error(msg)
+    }
 
-      let isTokenValid = await self._auth.testToken(token);
+    this._log.info("A token has been found.", token);
 
-      // TODO If token is found and the token is valid, then redriect back to the
-      // initial page or the items page.
+    let isTokenValid = await this._auth.IsTokenValid(token);
 
-      resolve(null);
-    });
+    this._log.info("Is the token valid?", isTokenValid);
 
-    this.tracker.addPromise(promise);
+    // TODO If token is found and the token is valid, then redriect back to the
+    // initial page or the items page.
   }
 
   public async signOut(): Promise<any> {
     return this._q((resolve, reject) => {
-      let browserRef = window.open('https://www.bungie.net/en/User/SignOut/', '_blank', 'location=yes');
+      let ref = window.open('https://www.bungie.net/en/User/SignOut/', '_blank', 'location=yes,hidden=yes');
 
-      browserRef.addEventListener('loadstop', function(event) {
-        browserRef.close();
+      ref.addEventListener('loadstop', function(event) {
+        ref.close();
         resolve();
       });
     });
@@ -71,7 +69,7 @@ export default class SigninCtrl {
     let self = this;
 
     return this._q((resolve, reject) => {
-      let browserRef = window.open('https://www.bungie.net/en/User/SignIn/Xuid', '_blank', 'location=yes,hidden=yes');
+      let ref = window.open('https://www.bungie.net/en/User/SignIn/Xuid', '_blank', 'location=yes,hidden=yes');
 
       // If the loaded page has the 'bungled' header, then the user is
       // authenticated.  If the loaded page does not have a 'bungled' header,
@@ -87,76 +85,45 @@ export default class SigninCtrl {
       var results = [deferedLoadstop.promise, deferedExit.promise];
 
       // Test every page load for the 'bungled' header.
-      browserRef.addEventListener('loadstop', function (event) {
+      ref.addEventListener('loadstop', function(event) {
         alert("loadstop");
         try {
-          browserRef.executeScript({
+          ref.executeScript({
             code: 'document.cookie'
-          }, async function r(result) {
-            let token = self._auth.getCookieFromBrowserReference.bind(self, result)();
+          }, async function(result) {
+              let token = await self._auth.getCookieFromReference(ref);
+              token = self._auth.getTokenFromCookie(token);
 
-            if (token === "") {
-              alert("loadstop - no token");
-              browserRef.show();
-              deferedLoadstop.resolve();
-            } else {
-              alert("loadstop - found token");
-              browserRef.close();
+              if (token === "") {
+                alert("loadstop - no token");
+                ref.show();
+                deferedLoadstop.resolve();
+              } else {
+                alert("loadstop - found token - " + token);
+                ref.close();
 
-              alert(await self._auth.testToken(token));
-              deferedLoadstop.resolve();
-            }
-          });
+                alert(await self._auth.IsTokenValid(token));
+                deferedLoadstop.resolve();
+              }
+            });
         } catch (e) {
           console.log(e);
           reject(e.toString());
           deferedLoadstop.resolve();
         }
-
-        // try {
-        //   browserRef.executeScript({
-        //     code: 'document.cookie'
-        //   }, (result) => {
-        //     resolve(self._auth.getCookieFromBrowserReference.bind(self, result)());
-        //   });
-        // } catch (e) {
-        //   console.log(e);
-        //   browserRef.close();
-        //   reject(e.toString());
-        // }
       });
 
       // Test closed window for the 'bungled' header.
-      browserRef.addEventListener('exit', (event) => {
+      ref.addEventListener('exit', (event) => {
         alert("exit");
 
         deferedExit.resolve();
       });
 
       resolve(self._q.all(results).then(function() {
-  alert("end promise.");
-  browserRef.close();
-}));
-
-      // browserRef.addEventListener('loadstop', function(event) {
-      //   browserRef.close();
-      //
-      //   let request: ng.IRequestConfig = {
-      //     method: 'GET',
-      //     url: 'https://www.bungie.net/Platform/User/GetBungieNetUser/',
-      //     headers: {
-      //       'X-API-Key': self._apiKey,
-      //       'x-csrf': self._token
-      //     },
-      //     withCredentials: true
-      //   };
-      //
-      //   resolve(self._http(request).then(function(result) {
-      //     window.alert(JSON.stringify(result.data["ErrorCode"]));
-      //
-      //     resolve();
-      //   }));
-      // });
+        alert("end promise.");
+        ref.close();
+      }));
     });
   }
 };

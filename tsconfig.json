@@ -24,6 +24,7 @@
     "./src/shell/signin.controller.ts",
     "./src/shell/shell.module.ts",
     "./src/utility/utility.module.ts",
-    "./src/utility/promiseTracker.service.ts"
+    "./src/utility/promiseTracker.service.ts",
+    "./src/utility/cookieParser.service.ts"
   ]
 }
