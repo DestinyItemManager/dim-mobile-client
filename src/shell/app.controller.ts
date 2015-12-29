@@ -3,9 +3,9 @@
 import PromiseTrackerService from "../utility/promiseTracker.service";
 
 export default class AppCtrl {
-  static $inject = ["$ionicPlatform", "$cordovaSplashscreen"];
+  static $inject = ["$ionicPlatform", "$cordovaSplashscreen", "$log"];
 
-  constructor($ionicPlatform: ionic.platform.IonicPlatformService, $cordovaSplashscreen) {
+  constructor($ionicPlatform: ionic.platform.IonicPlatformService, $cordovaSplashscreen, $log: ng.ILogService) {
     $ionicPlatform.ready(function() {
       // Hides splash screen
       if (window.cordova) {
@@ -13,7 +13,7 @@ export default class AppCtrl {
           $cordovaSplashscreen.hide();
         }, 1000);
       } else {
-        console.log("Cordova not found.");
+        $log.log("Cordova not found.");
       }
     });
   }

@@ -3,6 +3,7 @@
 /// <reference path="../../typings/lodash/lodash.d.ts" />
 
 import IPrinciple from "./IPrinciple";
+import IDestinyService from "../bungie/IDestinyService";
 
 export default class AuthorizationService {
   private _http: ng.IHttpService;
@@ -14,12 +15,13 @@ export default class AuthorizationService {
   private _principal: IPrinciple;
   private _tracker: any;
   private _cookieParser: any;
+  private _destinyService: IDestinyService;
 
   private _apikey: string;
   private _returnToState: any;
   private _returnToStateParams: any;
 
-  static $inject = ["$http", "$q", "$log", "$rootScope", "$state", '$timeout', "dimPrinciple", "dimPromiseTracker", "dimCookieParser"];
+  static $inject = ["$http", "$q", "$log", "$rootScope", "$state", '$timeout', "dimPrinciple", "dimPromiseTracker", "dimCookieParser", "dimDestinyService"];
 
   constructor(
     $http: ng.IHttpService,
@@ -30,7 +32,8 @@ export default class AuthorizationService {
     $timeout: ng.ITimeoutService,
     principle: IPrinciple,
     tracker: any,
-    cookieParser: any) {
+    cookieParser: any,
+    destinyService: IDestinyService) {
 
     this._http = $http;
     this._q = $q;
@@ -41,6 +44,7 @@ export default class AuthorizationService {
     this._principal = principle;
     this._tracker = tracker;
     this._cookieParser = cookieParser;
+    this._destinyService = destinyService;
 
     this._returnToState = undefined;
     this._apikey = "57c5ff5864634503a0340ffdfbeb20c0";
@@ -65,7 +69,6 @@ export default class AuthorizationService {
       ref.executeScript({
         code: "document.cookie"
       }, (result) => {
-        console.log(result);
         if ((result || "").toString().indexOf("bungled") > -1) {
           if (_.isArray(result) && _.size(result) > 0) {
             resolve(result[0]);
@@ -83,11 +86,11 @@ export default class AuthorizationService {
   }
 
   public getBungieNetToken(): ng.IPromise<string> {
-    this._log.info("Getting token from bungie.net");
+    this._log.debug("Getting token from bungie.net");
 
     let self = this;
     let promise = this._q((resolve, reject) => {
-      self._log.info("Loading lightweight endpoint from bungie.net");
+      self._log.debug("Loading lightweight endpoint from bungie.net");
 
       // Lightweight endpoint on Bungie.net to get an http response.
       let ref = window.open('https://www.bungie.net/help', '_blank', 'location=no,hidden=yes');
@@ -119,7 +122,7 @@ export default class AuthorizationService {
     })
     .then(this.getTokenFromCookie.bind(self))
     .catch((error) => {
-      console.log(error);
+      this._log.error(error);
 
       return "";
     });
@@ -128,27 +131,18 @@ export default class AuthorizationService {
   }
 
   public async IsTokenValid(token: string): Promise<boolean> {
-    let request: ng.IRequestConfig;
-    let result: ng.IHttpPromiseCallbackArg<any>;
+    let result;
     let isValid = false;
 
-    this._log.info("Testing token to see if it can get data from Bungie.net.");
+    this._log.debug("Testing token to see if it can get data from Bungie.net.");
 
-    request = {
-      method: 'GET',
-      url: 'https://www.bungie.net/Platform/User/GetBungieNetUser/',
-      headers: {
-        'X-API-Key': this._apikey,
-        'x-csrf': token
-      },
-      withCredentials: true
-    };
+    this._destinyService.token = token;
 
     try {
-      result = await this._http(request);
+      result = await this._destinyService.getBungieNetUser();
       isValid = (<any>result.data).ErrorCode === 1;
     } catch (e) {
-      this._log.error("The token validation request failed", e, request, result);
+      this._log.error("The token validation request failed", e, result);
       isValid = false;
     }
 

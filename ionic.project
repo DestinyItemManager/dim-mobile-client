@@ -1,6 +1,6 @@
 {
   "name": "destiny-item-manager",
-  "app_id": "8cc32a3d",
+  "app_id": "f05fdcf6",
   "gulpStartupTasks": [
     "build",
     "sass",

@@ -16,6 +16,9 @@ angular.module(moduleName, [
     utilityModule
   ])
   .controller("dimAppCtrl", AppCtrl)
-  .controller("dimSigninCtrl", SigninCtrl);
+  .controller("dimSigninCtrl", SigninCtrl)
+  .run(["$log", function($log) {
+    $log.info(`Loaded '${ moduleName }' module.`)
+  }]);
 
 export default moduleName;

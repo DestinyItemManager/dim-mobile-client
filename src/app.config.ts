@@ -7,6 +7,7 @@ export default function appConfig(
   $logProvider: ng.ILogProvider) {
 
   $logProvider.debugEnabled(true);
+  $logProvider.debugEnabled(false);
 
   // if none of the above states are matched, use this as the fallback
   $urlRouterProvider.otherwise("/items");

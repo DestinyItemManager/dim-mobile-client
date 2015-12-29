@@ -1,7 +1,8 @@
 /// <reference path="../../typings/angularjs/angular.d.ts" />
 
 interface IDestinyService {
-  getBungieNetUser(): ng.IPromise<any>
+  token: string;
+  getBungieNetUser(): Promise<any>
   getMembershipId(platfrom: any, patformUserId: any): ng.IPromise<any>
   getAccountDetails(membershipId: any): ng.IPromise<any>
   getCharacterInventory(membershipId: any, characterId: any): ng.IPromise<any>

@@ -8,7 +8,6 @@ export default class SigninCtrl {
   private _q: ng.IQService;
   private _log: ng.ILogService;
   private _cookieString: string;
-  private _apiKey: string;
   private _auth: AuthorizationService;
   private _token: string;
 
@@ -20,12 +19,13 @@ export default class SigninCtrl {
     this._http = $http;
     this._q = $q;
     this._log = $log;
-    this._apiKey = "57c5ff5864634503a0340ffdfbeb20c0";
     this._auth = authorization;
     this._token = "";
 
     this.tracker = tracker;
 
+    // async functions return promises.  We can use promises with our
+    // indeterminate progress indicator.
     this.tracker.addPromise(this.init());
   }
 
@@ -35,16 +35,17 @@ export default class SigninCtrl {
     try {
       token = await this._auth.getBungieNetToken();
     } catch (e) {
-      let msg = "Unable to get bungie token.";
-      this._log.error(msg, e);
-      throw new Error(msg)
+      let msg = "Unable to get a bungie token from Bungie.net.";
+      this._log.warn(msg, e);
     }
 
-    this._log.info("A token has been found.", token);
+    if (_.size(token) > 0) {
+      this._log.debug("A token has been found.", token);
 
-    let isTokenValid = await this._auth.IsTokenValid(token);
+      let isTokenValid = await this._auth.IsTokenValid(token);
 
-    this._log.info("Is the token valid?", isTokenValid);
+      this._log.debug("Is the token valid?", isTokenValid);
+    }
 
     // TODO If token is found and the token is valid, then redriect back to the
     // initial page or the items page.

@@ -6,7 +6,7 @@ export default class PromiseTrackerService {
   static instance: any = undefined;
 
   static factory($log: ng.ILogService, promiseTracker: any) {
-    $log.info("Getting PromiseTracker from factory.");
+    $log.debug("Getting PromiseTracker from factory.");
 
     if (!PromiseTrackerService.instance) {
       PromiseTrackerService.instance = promiseTracker();

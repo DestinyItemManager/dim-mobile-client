@@ -2,7 +2,7 @@
   "name": "destiny-item-manager",
   "private": true,
   "devDependencies": {
-    "ionic": "driftyco/ionic-bower"
+    "ionic": "~1.2.1"
   },
   "dependencies": {
     "ngCordova": "~0.1.23-alpha",
