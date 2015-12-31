@@ -15,7 +15,8 @@ Run.$inject = [
     "$state",
     "$stateParams",
     "dimAuthorizationService",
-    "dimPrinciple"];
+    "dimPrinciple",
+    "$log"];
 
 function Run(
   $ionicPlatform: ionic.platform.IonicPlatformService,
@@ -25,7 +26,10 @@ function Run(
   $state: angular.ui.IStateService,
   $stateParams: angular.ui.IStateParamsService,
   authorizationService: AuthorizationService,
-  principal: IPrinciple) {
+  principal: IPrinciple,
+  $log: ng.ILogService) {
+
+  //$log = $log["getInstance"]("app.Run");
 
   $ionicPlatform.ready(function() {
     if (window.cordova && window.cordova.plugins.Keyboard) {
@@ -43,6 +47,7 @@ function Run(
     $rootScope["toStateParams"] = toStateParams;
 
     if (principal.hasIdentity) {
+      $log.debug('In app.run.');
       authorizationService.authorize();
     }
   });

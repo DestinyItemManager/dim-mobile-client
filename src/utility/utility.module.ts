@@ -9,6 +9,9 @@ angular.module(moduleName, [
     "ajoslin.promise-tracker"
   ])
   .factory("dimPromiseTracker", ["$log", "promiseTracker", PromiseTracker.factory])
-  .factory("dimCookieParser", ["$log", "$window", CookieParser.factory]);
+  .factory("dimCookieParser", ["$log", "$window", CookieParser.factory])
+  .run(["$log", function($log) {
+    $log.info(`Loaded '${ moduleName }' module.`);
+  }]);
 
 export default moduleName;

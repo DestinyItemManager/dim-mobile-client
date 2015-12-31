@@ -7,14 +7,14 @@ export default function appConfig(
   $logProvider: ng.ILogProvider) {
 
   $logProvider.debugEnabled(true);
-  $logProvider.debugEnabled(false);
+  //$logProvider.debugEnabled(false);
 
   // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise("/items");
+  $urlRouterProvider.otherwise("/dim/app/items");
 
   $stateProvider
     .state("root", {
-      url: "",
+      url: "/dim",
       abstract: true,
       template: "<ion-nav-view></ion-nav-view>",
       controller: "dimAppCtrl as app",
@@ -28,7 +28,7 @@ export default function appConfig(
     })
     .state("menu", {
       parent: "root",
-      url: "",
+      url: "/app",
       abstract: true,
       templateUrl: "templates/shell-menu.html",
     })
@@ -45,17 +45,40 @@ export default function appConfig(
       }
     })
     .state("signin", {
-      parent: "root",
+      cache: false,
+      parent: "menu",
       url: "/signin",
-      controller: "dimSigninCtrl as vm",
       data: {
         roles: []
       },
-      templateUrl: 'templates/signin.html'
-      // views: {
-      //   'menuContent': {
-      //     templateUrl: 'templates/signin.html'
-      //   }
-      // }
+      views: {
+        'menuContent': {
+          templateUrl: 'templates/signin.html',
+          controller: "dimSigninCtrl as vm",
+        }
+      }
+    })
+    .state("signout", {
+      cache: false,
+      parent: "menu",
+      url: "/signout",
+      data: {
+        roles: []
+      },
+      resolve: {
+        signout: function ($state, $q, $log) {
+          $log.debug("Signing out.");
+          return $q((resolve, reject) => {
+            let ref = window.open("https://www.bungie.net/en/User/SignOut/", "_blank", "location=yes,hidden=yes");
+
+            ref.addEventListener("loadstop", function(event) {
+              ref.close();
+              resolve();
+            });
+          }).then(function() {
+            $state.go('items');
+          });
+        }
+      }
     });
 }

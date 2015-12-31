@@ -2,6 +2,8 @@
 /// <reference path="../../typings/lodash/lodash.d.ts"/>
 
 import AuthorizationService from "../auth/authorizationService.service";
+import DimPrinciple from "../auth/dimPrinciple";
+import BungieIdentity from "../auth/bungieIdentity";
 
 export default class SigninCtrl {
   private _http: ng.IHttpService;
@@ -10,121 +12,226 @@ export default class SigninCtrl {
   private _cookieString: string;
   private _auth: AuthorizationService;
   private _token: string;
+  private _principal: DimPrinciple;
+  private _scope: ng.IScope;
+  private _state: ng.ui.IStateService;
+  private _cookieParser: any;
 
   public tracker: any;
 
-  static $inject = ['$http', '$q', '$log', 'dimAuthorizationService', 'dimPromiseTracker'];
+  static $inject = [
+    "$http",
+    "$q",
+    "$log",
+    "dimAuthorizationService",
+    "dimPromiseTracker",
+    "dimPrinciple",
+    "$scope",
+    "$state",
+    "dimCookieParser"];
 
-  constructor($http: ng.IHttpService, $q: ng.IQService, $log: ng.ILogService, authorization: AuthorizationService, tracker: any) {
+  constructor($http: ng.IHttpService,
+    $q: ng.IQService,
+    $log: ng.ILogService,
+    authorization: AuthorizationService,
+    tracker: any,
+    principle: DimPrinciple,
+    $scope: ng.IScope,
+    $state: ng.ui.IStateService,
+    cookieParser: any) {
+
     this._http = $http;
     this._q = $q;
-    this._log = $log;
+    this._log = $log["getInstance"]("shell.SigninCtrl");;
     this._auth = authorization;
     this._token = "";
+    this._principal = principle;
+    this._scope = $scope;
+    this._state = $state;
+    this._cookieParser = cookieParser;
 
     this.tracker = tracker;
-
-    // async functions return promises.  We can use promises with our
-    // indeterminate progress indicator.
-    this.tracker.addPromise(this.init());
   }
 
-  private async init(): Promise<void> {
-    let token:string = "";
-
-    try {
-      token = await this._auth.getBungieNetToken();
-    } catch (e) {
-      let msg = "Unable to get a bungie token from Bungie.net.";
-      this._log.warn(msg, e);
-    }
-
-    if (_.size(token) > 0) {
-      this._log.debug("A token has been found.", token);
-
-      let isTokenValid = await this._auth.IsTokenValid(token);
-
-      this._log.debug("Is the token valid?", isTokenValid);
-    }
-
-    // TODO If token is found and the token is valid, then redriect back to the
-    // initial page or the items page.
+  /**
+  * Signs the user out of Bungie.net
+  */
+  public signOut() {
+    this.tracker.addPromise(this.processSignout());
   }
 
-  public async signOut(): Promise<any> {
-    return this._q((resolve, reject) => {
-      let ref = window.open('https://www.bungie.net/en/User/SignOut/', '_blank', 'location=yes,hidden=yes');
+  /**
+  * Signs the user into Bungie.net.
+  */
+  public signIn(platform: string) {
+    this.tracker.addPromise(this.processSignin(platform));
+  }
 
-      ref.addEventListener('loadstop', function(event) {
+  /**
+  * Signs the user into Bungie.net.
+  */
+  public processSignout(): ng.IPromise<void> {
+    return this._q<void>((resolve, reject) => {
+      let ref = window.open("https://www.bungie.net/en/User/SignOut/", "_blank", "location=yes,hidden=yes");
+
+      ref.addEventListener("loadstop", function(event) {
         ref.close();
         resolve();
       });
     });
   }
 
-  public signIn(platform: string) {
-    this.tracker.addPromise(this._q.when(this.showLogin(platform)));
+  /**
+  * Returns the Bungie.net prefered platform signin string.
+  */
+  private getSigninPlatform(platform:string) {
+    switch (platform.toLowerCase()) {
+      case "psn":
+        return "Psnid";
+      case "xbl":
+        return "Xuid";
+      default:
+        throw new Error(`Invalid platform ID: ${ platform }`);
+    }
   }
 
-  private async showLogin(platform: string): Promise<{}> {
+  /**
+  * Extracts the token from the cookie.
+  */
+  private getTokenFromCookie(cookie: string): string {
+    let cookieObj = this._cookieParser.parse(cookie);
+
+    if (_.has(cookieObj, "bungled")) {
+      return cookieObj.bungled;
+    } else {
+      return "";
+    }
+  }
+
+  /**
+  * Extracts the token from the browser reference object.
+  */
+  private processReference(ref: any): ng.IPromise<string> {
     let self = this;
+    let deferred = self._q.defer<string>();
+    let token = "";
 
-    return this._q((resolve, reject) => {
-      let ref = window.open('https://www.bungie.net/en/User/SignIn/Xuid', '_blank', 'location=yes,hidden=yes');
+    if (!_.isEmpty(ref)) {
+      this._log.debug("Adding 'loadstop' listener to ref.");
 
-      // If the loaded page has the 'bungled' header, then the user is
-      // authenticated.  If the loaded page does not have a 'bungled' header,
-      // then we're on a platform sign in page.
+      // Attempts to get a cookie from each page load in the browser reference.
+      ref.addEventListener("loadstop", (event) => {
+        this._log.debug("Running script to get document cookie.");
 
-      // It is assumed that the init() function checks for a 'bungled' header
-      // so if we have a 'bungled' header when we open this page, then the user
-      // must be authenticated, so we can attempt a test.
+        ref.executeScript(
+          {
+            code: "document.cookie"
+          },
+          (result) => {
+            this._log.debug("Got the result from the loaded page.");
 
-      var deferedLoadstop = self._q.defer();
-      var deferedExit = self._q.defer();
-
-      var results = [deferedLoadstop.promise, deferedExit.promise];
-
-      // Test every page load for the 'bungled' header.
-      ref.addEventListener('loadstop', function(event) {
-        alert("loadstop");
-        try {
-          ref.executeScript({
-            code: 'document.cookie'
-          }, async function(result) {
-              let token = await self._auth.getCookieFromReference(ref);
-              token = self._auth.getTokenFromCookie(token);
-
-              if (token === "") {
-                alert("loadstop - no token");
-                ref.show();
-                deferedLoadstop.resolve();
-              } else {
-                alert("loadstop - found token - " + token);
-                ref.close();
-
-                alert(await self._auth.IsTokenValid(token));
-                deferedLoadstop.resolve();
+            if ((result || "").toString().indexOf("bungled") > -1) {
+              if (_.isArray(result) && (_.size(result) > 0) && _.isString(result[0])) {
+                token = self.getTokenFromCookie(result[0]);
+              } else if (_.isString(result)) {
+                token = self.getTokenFromCookie(result);
               }
-            });
-        } catch (e) {
-          console.log(e);
-          reject(e.toString());
-          deferedLoadstop.resolve();
+            }
+
+            if (_.size(token) > 0) {
+              this._log.debug("Token found; hide the page.", token);
+              deferred.resolve(token);
+              ref.close();
+            } else {
+              this._log.debug("No token found; show the page.");
+              ref.show();
+            }
+          });
+      });
+
+      // Handles the closing of the browser reference.  Checks to see if the
+      // token was able to be retrieved from this reference before it was closed.
+      ref.addEventListener("exit", (event) => {
+        this._log.debug("The browser ref is closing.");
+
+        if (_.size(token) === 0) {
+          this._log.debug("There was no token found in browser reference.");
+
+          deferred.resolve("");
         }
       });
+    } else {
+      let msg = "The parameter 'ref' was empty.";
+      this._log.debug(msg);
+      deferred.reject(msg);
+    }
 
-      // Test closed window for the 'bungled' header.
-      ref.addEventListener('exit', (event) => {
-        alert("exit");
+    return deferred.promise;
+  }
 
-        deferedExit.resolve();
-      });
+  /**
+   * Processes the browser reference to the signin page on Bungie.net
+   */
+  private async getTokenFromBungieLogin(platform: string): Promise<string> {
+    let self = this;
+    let token: string;
 
-      resolve(self._q.all(results).then(function() {
-        alert("end promise.");
-        ref.close();
-      }));
-    });
+    this._log.debug("Opening a window.");
+
+    let ref = window.open(`https://www.bungie.net/en/User/SignIn/${ this.getSigninPlatform(platform) }`, "_blank", "location=yes,hidden=yes");
+
+    try {
+      token = await self.processReference(ref);
+    } catch (err) {
+      token = "";
+    }
+
+    return token;
+  }
+
+  /**
+   * Processes the token, updates the Principle and Identity, and updates the
+   * DestinyService with the signed in token.
+   */
+  private async processSignin(platform: string): Promise<void> {
+    let self = this;
+    let token: string;
+
+    this._log.info("Attempting to log into Bungie.net.", platform);
+
+    try {
+      token = await this.getTokenFromBungieLogin(platform);
+
+      if (_.size(token) > 0) {
+        this._log.info("Login was successful.");
+      } else {
+        this._log.info("Login was unsuccessful.");
+      }
+    } catch (err) {
+    } finally {
+    }
+
+
+
+
+
+    //
+    // return deferred.promise
+    //   .then(function(token) {
+    //     if (token.length > 0) {
+    //       return self._principal.identity(true)
+    //         .then(function(identity) {
+    //           return self._principal.authenticate(identity);
+    //         })
+    //         .then(function() {
+    //           if (self._scope["returnToState"])
+    //             self._state.go(self._scope["returnToState"].name, self._scope["returnToStateParams"]);
+    //           else
+    //             self._state.go("items");
+    //
+    //           return null;
+    //         });
+    //     }
+    //   });
   }
 };

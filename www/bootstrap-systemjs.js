@@ -19,7 +19,8 @@ if (!!window["chrome"]) {
   "                      \n",
   "Destiny Item Manager v4 Alpha, 2016\n",
   "http://destinyitemmanager.com\n",
-  "http://twitter.com/ThisIsDIM\n\n"].join(''), "font-family: monospace");
+  "http://twitter.com/ThisIsDIM\n",
+  "https://github.com/DestinyItemManager\n\n"].join(''), "font-family: monospace");
 } else {
-  console.info("Destiny Item Manager v4 Alpha, 2016\nhttp://destinyitemmanager.com\nhttp://twitter.com/ThisIsDIM\n\n");
+  console.info("Destiny Item Manager v4 Alpha, 2016\nhttp://destinyitemmanager.com\nhttp://twitter.com/ThisIsDIM\nhttps://github.com/DestinyItemManager\n\n");
 }

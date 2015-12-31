@@ -2,9 +2,12 @@
 
 import destinyService from "./destinyService.service";
 
-let moduleName = "dimBungie";
+let moduleName = "dimBungieNetApiServices";
 
 angular.module(moduleName, [])
-  .service("dimDestinyService", destinyService);
+  .service("dimDestinyService", destinyService)
+  .run(["$log", function($log) {
+    $log.info(`Loaded '${ moduleName }' module.`);
+  }]);
 
 export default moduleName;

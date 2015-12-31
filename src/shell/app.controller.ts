@@ -1,7 +1,5 @@
 /// <reference path="../../typings/angularjs/angular.d.ts" />
 
-import PromiseTrackerService from "../utility/promiseTracker.service";
-
 export default class AppCtrl {
   static $inject = ["$ionicPlatform", "$cordovaSplashscreen", "$log"];
 

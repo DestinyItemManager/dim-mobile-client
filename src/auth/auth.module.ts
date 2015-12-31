@@ -14,6 +14,9 @@ angular.module(moduleName, [
   ])
   .service("dimPrinciple", DimPrinciple)
   .service("dimIdentity", BungieIdentity)
-  .service("dimAuthorizationService", AuthorizationService);
+  .service("dimAuthorizationService", AuthorizationService)
+  .run(["$log", function($log) {
+    $log.info(`Loaded '${ moduleName }' module.`);
+  }]);
 
 export default moduleName;

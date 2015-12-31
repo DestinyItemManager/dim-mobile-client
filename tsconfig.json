@@ -25,6 +25,7 @@
     "./src/shell/shell.module.ts",
     "./src/utility/utility.module.ts",
     "./src/utility/promiseTracker.service.ts",
-    "./src/utility/cookieParser.service.ts"
+    "./src/utility/cookieParser.service.ts",
+    "./src/utility/enhancedLogger.service.ts"
   ]
 }

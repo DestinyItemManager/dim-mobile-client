@@ -18,7 +18,7 @@ angular.module(moduleName, [
   .controller("dimAppCtrl", AppCtrl)
   .controller("dimSigninCtrl", SigninCtrl)
   .run(["$log", function($log) {
-    $log.info(`Loaded '${ moduleName }' module.`)
+    $log.info(`Loaded '${ moduleName }' module.`);
   }]);
 
 export default moduleName;

@@ -9,6 +9,9 @@
     "system.js": "~0.19.6",
     "angular-component": "https://github.com/toddmotto/angular-component.git",
     "lodash": "~3.10.1",
-    "promise-tracker": "angular-promise-tracker#~2.1.0"
+    "promise-tracker": "angular-promise-tracker#~2.1.0",
+    "angular-logger": "~1.0.3",
+    "sprintf": "~1.0.3",
+    "moment": "~2.10.6"
   }
 }
