@@ -15,9 +15,9 @@ export default class SigninCtrl {
   private _principal: DimPrincipal;
   private _scope: ng.IScope;
   private _state: ng.ui.IStateService;
-  private _cookieParser: any;
+  private _cookieParser;
 
-  public tracker: any;
+  public tracker;
 
   static $inject = [
     "$http",
@@ -34,11 +34,11 @@ export default class SigninCtrl {
     $q: ng.IQService,
     $log: ng.ILogService,
     authorization: AuthorizationService,
-    tracker: any,
+    tracker,
     principal: DimPrincipal,
     $scope: ng.IScope,
     $state: ng.ui.IStateService,
-    cookieParser: any) {
+    cookieParser) {
 
     this._http = $http;
     this._q = $q;
@@ -111,7 +111,7 @@ export default class SigninCtrl {
   /**
   * Extracts the token from the browser reference object.
   */
-  private processReference(ref: any): ng.IPromise<string> {
+  private processReference(ref): ng.IPromise<string> {
     let self = this;
     let deferred = self._q.defer<string>();
     let token = "";

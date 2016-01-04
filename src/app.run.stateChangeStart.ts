@@ -19,7 +19,7 @@ function Run(
   $stateParams: angular.ui.IStateParamsService,
   authService: AuthorizationService,
   principal: IPrincipal,
-  $log: any) {
+  $log) {
 
   $log = $log.getInstance("app.run.stateChangeStart");
 
@@ -39,15 +39,19 @@ function Run(
         if (!principal.isInAnyRole(toState.data.roles)) {
           $log.info("Authorization required; access denied.");
           $log.debug("on$stateChangeStart :: The identity did not have the required role(s).", principal.identity);
+
           // should go to an access-denied page.
           event.preventDefault();
+
           $state.go('signin', {
             accessdenied: true
           });
         }
       } else {
         $log.info("Authorization required; redirecting to 'Sign In'.");
+
         event.preventDefault();
+
         $state.go("signin", {
           state: {
             name: toState.name,

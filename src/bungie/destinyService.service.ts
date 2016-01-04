@@ -70,19 +70,19 @@ export default class DestinyService implements IDestinyService {
     return result;
   }
 
-  getMembershipId(platform: any, platformUserId: any): ng.IPromise<any>  {
+  getMembershipId(platform, platformUserId): ng.IPromise<any>  {
     return this._q.when(null);
   }
 
-  getAccountDetails(membershipId: any): ng.IPromise<any>  {
+  getAccountDetails(membershipId): ng.IPromise<any>  {
     return this._q.when(null);
   }
 
-  getCharacterInventory(membershipId: any, characterId: any): ng.IPromise<any>  {
+  getCharacterInventory(membershipId, characterId): ng.IPromise<any>  {
     return this._q.when(null);
   }
 
-  getAccountVault(platform: any): ng.IPromise<any> {
+  getAccountVault(platform): ng.IPromise<any> {
     return this._q.when(null);
   }
 };

@@ -12,8 +12,8 @@ Run.$inject = [
 function Run(
   $ionicPlatform: ionic.platform.IonicPlatformService,
   $timeout: ng.ITimeoutService,
-  $cordovaSplashscreen: any,
-  $log: any) {
+  $cordovaSplashscreen,
+  $log) {
 
   $ionicPlatform.ready(function() {
     if (window.cordova && window.cordova.plugins.Keyboard) {

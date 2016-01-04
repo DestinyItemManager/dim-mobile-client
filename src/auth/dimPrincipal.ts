@@ -15,7 +15,7 @@ export default class DimPrincipal implements IPrincipal {
   private _log: ng.ILogService;
   private _authenticated: boolean;
   private _identity: IIdentity;
-  private _cookieParser: any;
+  private _cookieParser;
   private _destinyService: IDestinyService;
 
   static $inject = [
@@ -25,7 +25,7 @@ export default class DimPrincipal implements IPrincipal {
     "dimCookieParser",
     "dimDestinyService"];
 
-  constructor($http: ng.IHttpService, $q: ng.IQService, $log: ng.ILogService, cookieParser: any, destinyService: IDestinyService) {
+  constructor($http: ng.IHttpService, $q: ng.IQService, $log: ng.ILogService, cookieParser, destinyService: IDestinyService) {
     this._http = $http;
     this._q = $q;
     this._log = $log["getInstance"]("auth.DimPrincipal");
@@ -95,7 +95,7 @@ export default class DimPrincipal implements IPrincipal {
   /**
   * Extracts the cookie from the browser reference object.
   */
-  private getCookieFromReference(ref: any): ng.IPromise<string> {
+  private getCookieFromReference(ref): ng.IPromise<string> {
     return this._q(function(resolve, reject) {
       ref.executeScript({
         code: "document.cookie"

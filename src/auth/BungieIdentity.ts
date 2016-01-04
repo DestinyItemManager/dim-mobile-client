@@ -2,12 +2,12 @@ import IIdentity from "./IIdentity";
 
 class BungieIdentity implements IIdentity {
   private _token: string;
-  private _user: any;
+  private _user;
   private _roles: Array<string> = new Array<string>();
 
   static $inject = [];
 
-  constructor(token: string, user?: any) {
+  constructor(token: string, user?) {
     this._token = token;
     this._user = user;
     this._roles.push("Guardian");

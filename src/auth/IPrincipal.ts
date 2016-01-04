@@ -6,8 +6,8 @@ interface IPrincipal {
   isInRole(role: string): boolean;
   isInAnyRole(roles: Array<string>): boolean;
   identity(force?: boolean): Promise<IIdentity>;
-  authenticate(IIdentity): any;
-  deauthenticate(): any;
+  authenticate(IIdentity);
+  deauthenticate();
 }
 
 export default IPrincipal;

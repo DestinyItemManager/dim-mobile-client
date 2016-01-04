@@ -2,7 +2,7 @@ interface IIdentity {
   // authenticate(): ng.IPromise<any>;
   // deauthenticate(): ng.IPromise<any>;
    token: string;
-   user: any;
+   user;
    roles: Array<string>;
 };
 
