@@ -5,28 +5,39 @@ export default function appConfig(
   $stateProvider: angular.ui.IStateProvider,
   $urlRouterProvider: angular.ui.IUrlRouterProvider) {
 
+  let initialStateName = "welcome";
+  let initialStateUrl = "/welcome";
+
   // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise("/dim/app/items");
+  $urlRouterProvider.otherwise(initialStateUrl);
 
   $stateProvider
     .state("root", {
-      url: "/dim",
       abstract: true,
       template: "<ion-nav-view></ion-nav-view>",
-      controller: "dimAppCtrl as app",
-      resolve: {
-        authorize: ["dimAuthorizationService",
-          function(authorization) {
-            return authorization.authorize();
-          }
-        ]
-      }
+      controller: "dimAppCtrl as app"
+      // controller: "dimAppCtrl as app",
+      // resolve: {
+      //   authorize: ["dimAuthorizationService",
+      //     function(authorization) {
+      //       return authorization.authorize();
+      //     }
+      //   ]
+      // }
     })
     .state("menu", {
       parent: "root",
-      url: "/app",
       abstract: true,
       templateUrl: "templates/shell-menu.html",
+    })
+    .state(initialStateName, {
+      parent: "menu",
+      url: initialStateUrl,
+      views: {
+        'menuContent': {
+          templateUrl: 'templates/welcome.html'
+        }
+      }
     })
     .state("items", {
       parent: "menu",
@@ -44,9 +55,6 @@ export default function appConfig(
       cache: false,
       parent: "menu",
       url: "/signin",
-      data: {
-        roles: []
-      },
       views: {
         'menuContent': {
           templateUrl: 'templates/signin.html',
@@ -58,9 +66,6 @@ export default function appConfig(
       cache: false,
       parent: "menu",
       url: "/signout",
-      data: {
-        roles: []
-      },
       resolve: {
         signout: function ($state, $q, $log) {
           $log.debug("Signing out.");
@@ -72,7 +77,7 @@ export default function appConfig(
               resolve();
             });
           }).then(function() {
-            $state.go('items');
+            $state.go(initialStateName);
           });
         }
       }
