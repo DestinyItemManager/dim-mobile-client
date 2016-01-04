@@ -2,7 +2,7 @@
 
 import bungieModule from "../bungie/bungie.module";
 import utilityModule from "../utility/utility.module";
-import DimPrinciple from "./dimPrinciple";
+import DimPrincipal from "./dimPrincipal";
 import BungieIdentity from "./bungieIdentity";
 import AuthorizationService from "./authorizationService.service";
 
@@ -12,7 +12,7 @@ angular.module(moduleName, [
     bungieModule,
     utilityModule
   ])
-  .service("dimPrinciple", DimPrinciple)
+  .service("dimPrincipal", DimPrincipal)
   .service("dimIdentity", BungieIdentity)
   .service("dimAuthorizationService", AuthorizationService)
   .run(["$log", function($log) {

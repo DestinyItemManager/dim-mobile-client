@@ -3,11 +3,7 @@
 
 export default function appConfig(
   $stateProvider: angular.ui.IStateProvider,
-  $urlRouterProvider: angular.ui.IUrlRouterProvider,
-  $logProvider: ng.ILogProvider) {
-
-  $logProvider.debugEnabled(true);
-  //$logProvider.debugEnabled(false);
+  $urlRouterProvider: angular.ui.IUrlRouterProvider) {
 
   // if none of the above states are matched, use this as the fallback
   $urlRouterProvider.otherwise("/dim/app/items");

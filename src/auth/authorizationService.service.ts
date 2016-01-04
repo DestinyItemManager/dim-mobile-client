@@ -2,7 +2,7 @@
 /// <reference path="../../typings/angular-ui-router/angular-ui-router.d.ts"/>
 /// <reference path="../../typings/lodash/lodash.d.ts" />
 
-import IPrinciple from "./IPrinciple";
+import IPrincipal from "./IPrincipal";
 import IDestinyService from "../bungie/IDestinyService";
 
 export default class AuthorizationService {
@@ -12,7 +12,7 @@ export default class AuthorizationService {
   private _rootScope: ng.IRootScopeService;
   private _state: angular.ui.IStateService;
   private _timeout: ng.ITimeoutService;
-  private _principal: IPrinciple;
+  private _principal: IPrincipal;
   private _tracker: any;
   private _cookieParser: any;
   private _destinyService: IDestinyService;
@@ -29,7 +29,7 @@ export default class AuthorizationService {
     "$rootScope",
     "$state",
     "$timeout",
-    "dimPrinciple",
+    "dimPrincipal",
     "dimPromiseTracker",
     "dimCookieParser",
     "dimDestinyService",
@@ -42,7 +42,7 @@ export default class AuthorizationService {
     $rootScope: ng.IRootScopeService,
     $state: angular.ui.IStateService,
     $timeout: ng.ITimeoutService,
-    principle: IPrinciple,
+    principal: IPrincipal,
     tracker: any,
     cookieParser: any,
     destinyService: IDestinyService,
@@ -54,7 +54,7 @@ export default class AuthorizationService {
     this._rootScope = $rootScope;
     this._state = $state;
     this._timeout = $timeout;
-    this._principal = principle;
+    this._principal = principal;
     this._tracker = tracker;
     this._cookieParser = cookieParser;
     this._destinyService = destinyService;

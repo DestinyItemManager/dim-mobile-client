@@ -1,9 +1,11 @@
 /// <reference path="../typings/angularjs/angular.d.ts" />
 
-import authModule from "./auth/auth.module"
-import shellModule from "./shell/shell.module"
-import runFn from "./app.run"
-import configFn from "./app.config"
+import authModule from "./auth/auth.module";
+import shellModule from "./shell/shell.module";
+import platformReady from "./app.run.platformReady";
+import stateChangeStart from "./app.run.stateChangeStart";
+import logging from "./app.run.logging";
+import config from "./app.config";
 
 let app = angular.module("dimApp",
   [
@@ -14,8 +16,10 @@ let app = angular.module("dimApp",
     authModule,
     shellModule
   ])
-  .run(runFn)
-  .config(configFn)
+  .run(platformReady)
+  .run(stateChangeStart)
+  .run(logging)
+  .config(config)
   .config(["$provide", function ($provide) {
     $provide.decorator("$state", ["$delegate", "$log", function ($delegate, $log) {
       // let's locally use 'state' name
@@ -49,9 +53,6 @@ let app = angular.module("dimApp",
 
       return $delegate;
     }]);
-  }])
-  .run(["$log", function($log) {
-    $log.info(`Loaded 'dimApp' module.`);
   }]);
 
 export default app;

@@ -1,6 +1,6 @@
 import IIdentity from "./IIdentity";
 
-interface IPrinciple {
+interface IPrincipal {
   hasIdentity: boolean;
   isAuthenticated: boolean;
   isInRole(role: string): boolean;
@@ -10,4 +10,4 @@ interface IPrinciple {
   deauthenticate(): any;
 }
 
-export default IPrinciple;
+export default IPrincipal;

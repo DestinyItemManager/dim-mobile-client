@@ -2,7 +2,7 @@
 /// <reference path="../../typings/lodash/lodash.d.ts"/>
 
 import AuthorizationService from "../auth/authorizationService.service";
-import DimPrinciple from "../auth/dimPrinciple";
+import DimPrincipal from "../auth/dimPrincipal";
 import BungieIdentity from "../auth/bungieIdentity";
 
 export default class SigninCtrl {
@@ -12,7 +12,7 @@ export default class SigninCtrl {
   private _cookieString: string;
   private _auth: AuthorizationService;
   private _token: string;
-  private _principal: DimPrinciple;
+  private _principal: DimPrincipal;
   private _scope: ng.IScope;
   private _state: ng.ui.IStateService;
   private _cookieParser: any;
@@ -25,7 +25,7 @@ export default class SigninCtrl {
     "$log",
     "dimAuthorizationService",
     "dimPromiseTracker",
-    "dimPrinciple",
+    "dimPrincipal",
     "$scope",
     "$state",
     "dimCookieParser"];
@@ -35,7 +35,7 @@ export default class SigninCtrl {
     $log: ng.ILogService,
     authorization: AuthorizationService,
     tracker: any,
-    principle: DimPrinciple,
+    principal: DimPrincipal,
     $scope: ng.IScope,
     $state: ng.ui.IStateService,
     cookieParser: any) {
@@ -45,7 +45,7 @@ export default class SigninCtrl {
     this._log = $log["getInstance"]("shell.SigninCtrl");;
     this._auth = authorization;
     this._token = "";
-    this._principal = principle;
+    this._principal = principal;
     this._scope = $scope;
     this._state = $state;
     this._cookieParser = cookieParser;
@@ -190,7 +190,7 @@ export default class SigninCtrl {
   }
 
   /**
-   * Processes the token, updates the Principle and Identity, and updates the
+   * Processes the token, updates the Principal and Identity, and updates the
    * DestinyService with the signed in token.
    */
   private async processSignin(platform: string): Promise<void> {

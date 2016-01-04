@@ -1,7 +1,7 @@
 /// <reference path="../../typings/angularjs/angular.d.ts" />
 /// <reference path="../../typings/lodash/lodash.d.ts"/>
 
-import IPrinciple from "./IPrinciple";
+import IPrincipal from "./IPrincipal";
 import IIdentity from "./IIdentity";
 import BungieIdentity from "./bungieIdentity";
 import IDestinyService from "../bungie/IDestinyService";
@@ -9,7 +9,7 @@ import IDestinyService from "../bungie/IDestinyService";
 /**
  * Class representing the current Identity context and authorizations.
  */
-export default class DimPrinciple implements IPrinciple {
+export default class DimPrincipal implements IPrincipal {
   private _http: ng.IHttpService;
   private _q: ng.IQService;
   private _log: ng.ILogService;
@@ -28,7 +28,7 @@ export default class DimPrinciple implements IPrinciple {
   constructor($http: ng.IHttpService, $q: ng.IQService, $log: ng.ILogService, cookieParser: any, destinyService: IDestinyService) {
     this._http = $http;
     this._q = $q;
-    this._log = $log["getInstance"]("auth.DimPrinciple");
+    this._log = $log["getInstance"]("auth.DimPrincipal");
     this._authenticated = false;
     this._identity = null;
     this._cookieParser = cookieParser;
@@ -36,14 +36,14 @@ export default class DimPrinciple implements IPrinciple {
   }
 
   /**
-  * Returns true if the Principle has an Identity.
+  * Returns true if the Principal has an Identity.
   */
   public get hasIdentity(): boolean {
     return !_.isEmpty(this._identity);
   }
 
   /**
-  * Returns true if the Identity associated with the Principle can access the
+  * Returns true if the Identity associated with the Principal can access the
   * Destiny API.
   */
   public get isAuthenticated(): boolean {
@@ -194,7 +194,7 @@ export default class DimPrinciple implements IPrinciple {
 
   /**
   * Creates an Identity object based on the available Bungie.net cookie. It will
-  * short-circuit if there is an Identity already on the Principle.  The 'force'
+  * short-circuit if there is an Identity already on the Principal.  The 'force'
   * argument can be used to make the function to get a new Identity object.
   */
   public async identity(force?: boolean): Promise<IIdentity> {
