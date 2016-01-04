@@ -13,7 +13,6 @@ export default class AuthorizationService {
   private _state: angular.ui.IStateService;
   private _timeout: ng.ITimeoutService;
   private _principal: IPrincipal;
-  private _tracker;
   private _cookieParser;
   private _destinyService: IDestinyService;
   private _ionicHistory: ionic.navigation.IonicHistoryService;
@@ -42,7 +41,6 @@ export default class AuthorizationService {
     $state: angular.ui.IStateService,
     $timeout: ng.ITimeoutService,
     principal: IPrincipal,
-    tracker,
     cookieParser,
     destinyService: IDestinyService,
     $ionicHistory: ionic.navigation.IonicHistoryService) {
@@ -54,7 +52,6 @@ export default class AuthorizationService {
     this._state = $state;
     this._timeout = $timeout;
     this._principal = principal;
-    this._tracker = tracker;
     this._cookieParser = cookieParser;
     this._destinyService = destinyService;
     this._ionicHistory = $ionicHistory;

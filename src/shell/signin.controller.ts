@@ -24,7 +24,6 @@ export default class SigninCtrl {
     "$q",
     "$log",
     "dimAuthorizationService",
-    "dimPromiseTracker",
     "dimPrincipal",
     "$scope",
     "$state",
@@ -34,7 +33,6 @@ export default class SigninCtrl {
     $q: ng.IQService,
     $log: ng.ILogService,
     authorization: AuthorizationService,
-    tracker,
     principal: DimPrincipal,
     $scope: ng.IScope,
     $state: ng.ui.IStateService,
@@ -49,8 +47,6 @@ export default class SigninCtrl {
     this._scope = $scope;
     this._state = $state;
     this._cookieParser = cookieParser;
-
-    this.tracker = tracker;
   }
 
   /**

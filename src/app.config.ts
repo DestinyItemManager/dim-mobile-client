@@ -15,12 +15,19 @@ export default function appConfig(
     .state("root", {
       abstract: true,
       template: "<ion-nav-view></ion-nav-view>",
-      controller: "dimAppCtrl as app"
+      url: "",
+      controller: "dimAppCtrl as app",
+      resolve: {
+        init: ["dimInitAuthentication", function(init) {
+          return init.promise;
+        }]
+      }
       // controller: "dimAppCtrl as app",
       // resolve: {
-      //   authorize: ["dimAuthorizationService",
-      //     function(authorization) {
-      //       return authorization.authorize();
+      //   authorize: ["dimAuthorizationService", "$log",
+      //     function(authorization, $log) {
+      //       $log.info("hi");
+      //       //return authorization.authorize();
       //     }
       //   ]
       // }
@@ -28,6 +35,7 @@ export default function appConfig(
     .state("menu", {
       parent: "root",
       abstract: true,
+      url: "",
       templateUrl: "templates/shell-menu.html",
     })
     .state(initialStateName, {

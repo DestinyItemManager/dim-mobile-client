@@ -3,7 +3,7 @@
 export default class AppCtrl {
   static $inject = ["$ionicPlatform", "$cordovaSplashscreen", "$log"];
 
-  constructor($ionicPlatform: ionic.platform.IonicPlatformService, $cordovaSplashscreen, $log: ng.ILogService) {
+  constructor($ionicPlatform: ionic.platform.IonicPlatformService, $cordovaSplashscreen, $log) {
     $ionicPlatform.ready(function() {
       // Hides splash screen
       if (window.cordova) {
@@ -11,7 +11,7 @@ export default class AppCtrl {
           $cordovaSplashscreen.hide();
         }, 1000);
       } else {
-        $log.log("Cordova not found.");
+        $log.getInstance("AppCtrl").debug("constructor :: Cordova not found.");
       }
     });
   }

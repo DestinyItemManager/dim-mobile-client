@@ -19,6 +19,20 @@ let app = angular.module("dimApp",
   .run(platformReady)
   .run(stateChangeStart)
   .run(logging)
-  .config(config);
+  .config(config)
+  .factory("dimInitAuthentication", ["$q", "$log", function($q, $log) {
+    var log = $log.getInstance("dimInitAuthentication");
+    var deferred = $q.defer();
+    var promise = deferred.promise
+      .catch(function(error) {
+        log.error("There was an error while authentiating the visitor.", error);
+      });
+    var service = {
+      deferred: deferred,
+      promise: promise
+    };
+
+    return service;
+}]);
 
 export default app;

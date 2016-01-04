@@ -11,7 +11,9 @@ Run.$inject = [
     "$stateParams",
     "dimAuthorizationService",
     "dimPrincipal",
-    "$log"];
+    "$log",
+    "dimInitAuthentication",
+    "$timeout"];
 
 function Run(
   $rootScope: ng.IRootScopeService,
@@ -19,7 +21,9 @@ function Run(
   $stateParams: angular.ui.IStateParamsService,
   authService: AuthorizationService,
   principal: IPrincipal,
-  $log) {
+  $log,
+  init,
+  $timeout) {
 
   $log = $log.getInstance("app.run.stateChangeStart");
 
@@ -27,43 +31,51 @@ function Run(
     return (_.has(state, "data.roles") && _.isArray(state.data.roles) && (_.size(state.data.roles) > 0));
   }
 
+  $timeout(function() {
+    init.deferred.reject();
+    $log.trace("deffered :: resolved.")
+  }, 5000);
+
   $rootScope.$on('$stateChangeStart', function(event, toState, toParams) {
-    $log.trace("on$stateChangeStart :: Start");
-    $log.debug(`on$stateChangeStart :: Changing State: ${ toState.name }`, toState, toParams);
+    init.promise
+      .then(function() {
+        $log.trace("on$stateChangeStart :: Start");
+        $log.debug(`on$stateChangeStart :: Changing State: ${ toState.name }`, toState, toParams);
 
-    if (stateHasRoles(toState)) {
-      $log.debug("on$stateChangeStart :: Route has roles", toState.data.roles);
+        if (stateHasRoles(toState)) {
+          $log.debug("on$stateChangeStart :: Route has roles", toState.data.roles);
 
-      if (principal.isAuthenticated) {
-        $log.trace("on$stateChangeStart :: User is authenticated.");
-        if (!principal.isInAnyRole(toState.data.roles)) {
-          $log.info("Authorization required; access denied.");
-          $log.debug("on$stateChangeStart :: The identity did not have the required role(s).", principal.identity);
+          if (principal.isAuthenticated) {
+            $log.trace("on$stateChangeStart :: User is authenticated.");
+            if (!principal.isInAnyRole(toState.data.roles)) {
+              $log.info("Authorization required; access denied.");
+              $log.debug("on$stateChangeStart :: The identity did not have the required role(s).", principal.identity);
 
-          // should go to an access-denied page.
-          event.preventDefault();
+              // should go to an access-denied page.
+              event.preventDefault();
 
-          $state.go('signin', {
-            accessdenied: true
-          });
-        }
-      } else {
-        $log.info("Authorization required; redirecting to 'Sign In'.");
+              $state.go('signin', {
+                accessdenied: true
+              });
+            }
+          } else {
+            $log.info("Authorization required; redirecting to 'Sign In'.");
 
-        event.preventDefault();
+            event.preventDefault();
 
-        $state.go("signin", {
-          state: {
-            name: toState.name,
-            params: toParams
+            $state.go("signin", {
+              state: {
+                name: toState.name,
+                params: toParams
+              }
+            });
           }
-        });
-      }
-    } else {
-      $log.debug("on$stateChangeStart :: Route has no roles", []);
-    }
+        } else {
+          $log.debug("on$stateChangeStart :: Route has no roles", []);
+        }
 
-    $log.trace("on$stateChangeStart :: End");
+        $log.trace("on$stateChangeStart :: End");
+      });
   });
 }
 

@@ -5,8 +5,8 @@ declare var promiseTracker:any;
 export default class PromiseTrackerService {
   static instance = undefined;
 
-  static factory($log: ng.ILogService, promiseTracker) {
-    $log.debug("Getting PromiseTracker from factory.");
+  static factory($log, promiseTracker) {
+    $log.getInstance("PromiseTrackerService").trace("factory :: Getting PromiseTracker from factory.");
 
     if (!PromiseTrackerService.instance) {
       PromiseTrackerService.instance = promiseTracker();
@@ -15,3 +15,5 @@ export default class PromiseTrackerService {
     return PromiseTrackerService.instance;
   }
 };
+
+PromiseTrackerService.factory.$inject = ["$log", "promiseTracker"];

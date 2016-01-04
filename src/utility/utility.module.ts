@@ -6,12 +6,14 @@ import CookieParser from "./cookieParser.service";
 let moduleName = "dimUtility";
 
 angular.module(moduleName, [
-    "ajoslin.promise-tracker"
+    "ajoslin.promise-tracker",
+    "angular-logger"
   ])
-  .factory("dimPromiseTracker", ["$log", "promiseTracker", PromiseTracker.factory])
-  .factory("dimCookieParser", ["$log", "$window", CookieParser.factory])
   .run(["$log", function($log) {
     $log.info(`Loaded '${ moduleName }' module.`);
-  }]);
+    $log.logLevels['*'] = $log.LEVEL.DEBUG;
+  }])
+  .factory("dimPromiseTracker", PromiseTracker.factory)
+  .factory("dimCookieParser", CookieParser.factory);
 
 export default moduleName;
