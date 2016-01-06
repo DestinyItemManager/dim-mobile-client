@@ -12,7 +12,7 @@ import IDestinyService from "../bungie/IDestinyService";
 export default class DimPrincipal implements IPrincipal {
   private _http: ng.IHttpService;
   private _q: ng.IQService;
-  private _log: ng.ILogService;
+  private _log;
   private _authenticated: boolean;
   private _identity: IIdentity;
   private _cookieParser;
@@ -25,7 +25,7 @@ export default class DimPrincipal implements IPrincipal {
     "dimCookieParser",
     "dimDestinyService"];
 
-  constructor($http: ng.IHttpService, $q: ng.IQService, $log: ng.ILogService, cookieParser, destinyService: IDestinyService) {
+  constructor($http: ng.IHttpService, $q: ng.IQService, $log, cookieParser, destinyService: IDestinyService) {
     this._http = $http;
     this._q = $q;
     this._log = $log["getInstance"]("auth.DimPrincipal");
@@ -199,6 +199,17 @@ export default class DimPrincipal implements IPrincipal {
   */
   public async identity(force?: boolean): Promise<IIdentity> {
     let token;
+
+    this._log.trace("identity :: Getting an Identity object.");
+
+
+
+                                // self._log.trace("identity :: Getting an Identity object.");
+                                // // Force the resolution of the identy from an available token.
+                                // if (force) {
+                                //     self._log.trace("identity :: Forced to get a new identity object.");
+                                //     self._identity = null;
+                                // }
 
     // Force the resolution of the identy from an available token.
     if (force) {

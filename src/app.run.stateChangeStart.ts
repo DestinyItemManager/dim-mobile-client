@@ -21,62 +21,52 @@ function Run(
   $stateParams: angular.ui.IStateParamsService,
   authService: AuthorizationService,
   principal: IPrincipal,
-  $log,
-  init,
-  $timeout) {
+  $log) {
+    $log = $log.getInstance("app.run.stateChangeStart");
 
-  $log = $log.getInstance("app.run.stateChangeStart");
+    function stateHasRoles(state) {
+      return (_.has(state, "data.roles") && _.isArray(state.data.roles) && (_.size(state.data.roles) > 0));
+    }
 
-  function stateHasRoles(state) {
-    return (_.has(state, "data.roles") && _.isArray(state.data.roles) && (_.size(state.data.roles) > 0));
-  }
+    $rootScope.$on('$stateChangeStart', function(event, toState, toParams) {
+      $log.trace("on$stateChangeStart :: Start");
+      $log.debug(`on$stateChangeStart :: Changing State: ${ toState.name }`, toState, toParams);
 
-  $timeout(function() {
-    init.deferred.reject();
-    $log.trace("deffered :: resolved.")
-  }, 5000);
+      if (stateHasRoles(toState)) {
+        $log.debug("on$stateChangeStart :: Route has roles", toState.data.roles);
 
-  $rootScope.$on('$stateChangeStart', function(event, toState, toParams) {
-    init.promise
-      .then(function() {
-        $log.trace("on$stateChangeStart :: Start");
-        $log.debug(`on$stateChangeStart :: Changing State: ${ toState.name }`, toState, toParams);
+        if (principal.isAuthenticated) {
+          $log.trace("on$stateChangeStart :: User is authenticated.");
 
-        if (stateHasRoles(toState)) {
-          $log.debug("on$stateChangeStart :: Route has roles", toState.data.roles);
+          if (!principal.isInAnyRole(toState.data.roles)) {
+            $log.info("Authorization required; access denied.");
+            $log.debug("on$stateChangeStart :: The identity did not have the required role(s).", principal.identity);
 
-          if (principal.isAuthenticated) {
-            $log.trace("on$stateChangeStart :: User is authenticated.");
-            if (!principal.isInAnyRole(toState.data.roles)) {
-              $log.info("Authorization required; access denied.");
-              $log.debug("on$stateChangeStart :: The identity did not have the required role(s).", principal.identity);
-
-              // should go to an access-denied page.
-              event.preventDefault();
-
-              $state.go('signin', {
-                accessdenied: true
-              });
-            }
-          } else {
-            $log.info("Authorization required; redirecting to 'Sign In'.");
-
+            // should go to an access-denied page.
             event.preventDefault();
 
-            $state.go("signin", {
-              state: {
-                name: toState.name,
-                params: toParams
-              }
+            $state.go('signin', {
+              accessdenied: true
             });
           }
         } else {
-          $log.debug("on$stateChangeStart :: Route has no roles", []);
-        }
+          $log.info("Authorization required; redirecting to 'Sign In'.");
 
-        $log.trace("on$stateChangeStart :: End");
-      });
-  });
+          event.preventDefault();
+
+          $state.go("signin", {
+            state: {
+              name: toState.name,
+              params: toParams
+            }
+          });
+        }
+      } else {
+        $log.debug("on$stateChangeStart :: Route has no roles", []);
+      }
+
+      $log.trace("on$stateChangeStart :: End");
+    });
 }
 
 export default Run;

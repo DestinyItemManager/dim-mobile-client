@@ -17,8 +17,6 @@ export default class SigninCtrl {
   private _state: ng.ui.IStateService;
   private _cookieParser;
 
-  public tracker;
-
   static $inject = [
     "$http",
     "$q",
@@ -53,14 +51,14 @@ export default class SigninCtrl {
   * Signs the user out of Bungie.net
   */
   public signOut() {
-    this.tracker.addPromise(this.processSignout());
+    this.processSignout();
   }
 
   /**
   * Signs the user into Bungie.net.
   */
   public signIn(platform: string) {
-    this.tracker.addPromise(this.processSignin(platform));
+    this.processSignin(platform);
   }
 
   /**
@@ -174,7 +172,8 @@ export default class SigninCtrl {
 
     this._log.debug("Opening a window.");
 
-    let ref = window.open(`https://www.bungie.net/en/User/SignIn/${ this.getSigninPlatform(platform) }`, "_blank", "location=yes,hidden=yes");
+    //let ref = window.open(`https://www.bungie.net/en/User/SignIn/${ this.getSigninPlatform(platform) }`, "_blank", "location=yes,hidden=yes");
+    let ref = window.open(`https://www.bungie.net/en/User/SignIn/${ this.getSigninPlatform(platform) }`, "_blank", "location=yes");
 
     try {
       token = await self.processReference(ref);

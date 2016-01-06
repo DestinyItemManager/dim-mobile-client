@@ -28,7 +28,6 @@ export default class AuthorizationService {
     "$state",
     "$timeout",
     "dimPrincipal",
-    "dimPromiseTracker",
     "dimCookieParser",
     "dimDestinyService",
     "$ionicHistory"];
@@ -64,7 +63,7 @@ export default class AuthorizationService {
    * based on available credentials (cookies) if an identity is not present.
    * Verifies the identity can access Destiny API resources.
    */
-  async authorize(roles?: Array<string>) {
+  async authorize() {
     let self = this;
 
     self._log.trace("authorize :: Start");
