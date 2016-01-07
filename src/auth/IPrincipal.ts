@@ -1,4 +1,4 @@
-import IIdentity from "./IIdentity";
+import IIdentity from "./iidentity";
 
 interface IPrincipal {
   hasIdentity: boolean;

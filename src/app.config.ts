@@ -38,7 +38,8 @@ export default function appConfig(
         },
         views: {
           'menuContent': {
-            templateUrl: 'templates/items.html'
+            templateUrl: 'templates/items.html',
+            controller: "dimItemsCtrl as vm"
           }
         }
       })
@@ -47,43 +48,54 @@ export default function appConfig(
         url: "/characters",
         views: {
           'menuContent': {
-            templateUrl: 'templates/items.html'
+            templateUrl: 'templates/characters.html'
           }
         }
       })
-      .state("getIdentity", {
+      .state("signinPreload", {
         cache: false,
         parent: "menu",
         abstract: true,
+        url: "",
         views: {
           'menuContent': {
             template: "<ion-nav-view></ion-nav-view>"
           }
         },
         resolve: {
-          identity: ["$state", "$ionicHistory", "$q", function($state, $ionicHistory, $q) {
-            return $q(function(resolve, reject) {
-              $ionicHistory.nextViewOptions({
-                disableAnimate: true,
-                disableBack: true
-              });
+          identity: ["$state", "$ionicHistory", "$q", "dimPrincipal", "$rootScope", function($state, $ionicHistory, $q, principal, $rootScope) {
+            return $q.when(principal.identity(true))
+              .then(function(identity) {
+                console.debug("preload", identity);
 
-              $state.go("welcome");
-              return null;
+                if (principal.isAuthenticated) {
+                  $ionicHistory.nextViewOptions({
+                    disableBack: true
+                  });
+
+                  if (_.has($rootScope, "redirectToState")) {
+                    $state.go($rootScope["redirectToState"].name, $rootScope["redirectToState"].params)
+                  } else {
+                    $state.go("welcome");
+                  }
+                }
+
+                return identity;
             });
           }]
         }
       })
       .state("signin", {
         cache: false,
-        parent: "getIdentity",
+        parent: "signinPreload",
         url: "/signin",
         templateUrl: 'templates/signin.html',
         controller: "dimSigninCtrl as vm",
         resolve: {
-          getIdentity: function(identity) {
+          getIdentity: ["identity", "$state", function(identity, $state) {
+            console.debug("signin", identity);
             return identity;
-          }
+          }]
         }
       })
       .state("signout", {
@@ -91,19 +103,47 @@ export default function appConfig(
         parent: "menu",
         url: "/signout",
         resolve: {
-          signout: function ($state, $q, $log) {
+          signout: function ($state, $q, $log, $ionicHistory, dimPrincipal) {
             $log.debug("Signing out.");
             return $q((resolve, reject) => {
-              let ref = window.open("https://www.bungie.net/en/User/SignOut/", "_blank", "location=yes,hidden=yes");
+              let ref = window.open("https://www.bungie.net/en/User/SignOut", "_blank", "location=yes,hidden=yes,clearsessioncache=yes");
 
               ref.addEventListener("loadstop", function(event) {
                 ref.close();
+              });
+
+              ref.addEventListener("loaderror", function(event) {
+                ref.close();
+              });
+
+              ref.addEventListener("exit", function(event) {
                 resolve();
               });
-            }).then(function() {
+            })
+            .then(function() {
+              window["cookies"].clear(function() {
+                console.log("Cookies cleared!");
+              });
+            })
+            .then(function() {
+              return $q(function(resolve, reject) {
+                setTimeout(function() {
+                  dimPrincipal.identity(true);
+                  resolve();
+                }, 50);
+              });
+            })
+            .then(function() {
+              $ionicHistory.nextViewOptions({
+                disableBack: true
+              });
+
               $state.go("welcome");
-            });
-          }
+            // .then(function() {
+            //   setTimeout(() => window.location.reload(), 50);
+            // });
+          });
         }
-      });
+      }
+    });
 }

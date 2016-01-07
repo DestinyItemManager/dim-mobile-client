@@ -2,8 +2,8 @@
 /// <reference path="../../typings/angular-ui-router/angular-ui-router.d.ts"/>
 /// <reference path="../../typings/lodash/lodash.d.ts" />
 
-import IPrincipal from "./IPrincipal";
-import IDestinyService from "../bungie/IDestinyService";
+import IPrincipal from "./iprincipal";
+import IDestinyService from "../bungie/idestinyService";
 
 export default class AuthorizationService {
   private _http: ng.IHttpService;
@@ -57,6 +57,8 @@ export default class AuthorizationService {
 
     this._returnToState = undefined;
   }
+
+
 
   /**
    * Used to verify a visitor can view a resource.  Creates an identity object

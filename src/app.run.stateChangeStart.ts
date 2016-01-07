@@ -3,7 +3,7 @@
 /// <reference path="../typings/lodash/lodash.d.ts"/>
 
 import AuthorizationService from "./auth/authorizationService.service";
-import IPrincipal from "./auth/IPrincipal";
+import IPrincipal from "./auth/iprincipal";
 
 Run.$inject = [
     "$rootScope",
@@ -40,7 +40,7 @@ function Run(
 
           if (!principal.isInAnyRole(toState.data.roles)) {
             $log.info("Authorization required; access denied.");
-            $log.debug("on$stateChangeStart :: The identity did not have the required role(s).", principal.identity);
+            $log.debug("on$stateChangeStart :: The identity did not have the required role(s).", principal);
 
             // should go to an access-denied page.
             event.preventDefault();
@@ -53,6 +53,11 @@ function Run(
           $log.info("Authorization required; redirecting to 'Sign In'.");
 
           event.preventDefault();
+
+          $rootScope["redirectToState"] = {
+            name: toState.name,
+            params: toParams
+          };
 
           $state.go("signin", {
             state: {

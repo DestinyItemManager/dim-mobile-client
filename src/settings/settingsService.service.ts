@@ -1,6 +1,6 @@
 /// <reference path="../../typings/angularjs/angular.d.ts" />
 
-import ISettingsService from "./ISettingsService";
+import ISettingsService from "./isettingsService";
 
 export default class SettingsService implements ISettingsService {
   private _http: ng.IHttpService;

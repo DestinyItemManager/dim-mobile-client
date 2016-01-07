@@ -1,7 +1,7 @@
 /// <reference path="../../typings/angularjs/angular.d.ts" />
 /// <reference path="../../typings/node/node.d.ts" />
 
-import IDestinyService from "./IDestinyService";
+import IDestinyService from "./idestinyService";
 
 export default class DestinyService implements IDestinyService {
   private _http: ng.IHttpService;
@@ -56,18 +56,24 @@ export default class DestinyService implements IDestinyService {
       withCredentials: true
     };
 
-    this._log.debug("Creating http request.", request);
+    this._log.debug("getBungieNetUser :: Creating http request.", request);
 
     try {
       result = await this._http(request);
 
-      this._log.debug("Http request was successful.", result);
-    } catch (e) {
-      this._log.error("The request failed.", e, request, result);
-      throw e;
+      this._log.debug("getBungieNetUser :: HTTP request was successful.", result);
+    } catch (err) {
+      this._log.debug("getBungieNetUser :: The request failed.", err, request, result);
+      throw err;
     }
 
-    return result;
+    if ((<any>result.data).ErrorCode !== 1) {
+      let msg = "The request failed with an ErrorCode.";
+      this._log.debug(`getBungieNetUser :: ${ msg }`, request, result);
+      throw new Error(msg);
+    }
+
+    return (<any>result.data).Response;
   }
 
   getMembershipId(platform, platformUserId): ng.IPromise<any>  {

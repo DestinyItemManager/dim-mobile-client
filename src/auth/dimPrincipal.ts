@@ -1,10 +1,10 @@
 /// <reference path="../../typings/angularjs/angular.d.ts" />
 /// <reference path="../../typings/lodash/lodash.d.ts"/>
 
-import IPrincipal from "./IPrincipal";
-import IIdentity from "./IIdentity";
+import IPrincipal from "./iprincipal";
+import IIdentity from "./iidentity";
 import BungieIdentity from "./bungieIdentity";
-import IDestinyService from "../bungie/IDestinyService";
+import IDestinyService from "../bungie/idestinyService";
 
 /**
  * Class representing the current Identity context and authorizations.
@@ -39,7 +39,13 @@ export default class DimPrincipal implements IPrincipal {
   * Returns true if the Principal has an Identity.
   */
   public get hasIdentity(): boolean {
-    return !_.isEmpty(this._identity);
+    this._log.trace("hasIdentity :: Checking if pricipal has an identity.");
+
+    let result = !_.isEmpty(this._identity);
+
+    this._log.debug("hasIdentity :: Does the principal have an identity?", result);
+
+    return result;
   }
 
   /**
@@ -47,35 +53,39 @@ export default class DimPrincipal implements IPrincipal {
   * Destiny API.
   */
   public get isAuthenticated(): boolean {
-    return this._authenticated;
+    this._log.trace("isAuthenticated :: Checking if identity is authenticated.");
+
+    let result = this._authenticated;
+
+    this._log.debug("isAuthenticated :: Is identity authenticated?", result);
+
+    return result;
   }
 
   /**
   * Returns true if any one of the roles parameter matches one of the uses roles.
   */
   public isInAnyRole(roles:Array<string>): boolean {
-    if (!this._authenticated || !this._identity.roles) {
-      return false;
-    }
+    this._log.trace("isInAnyRole :: Checking for role membership.");
 
-    for (var i = 0; i < roles.length; i++) {
-      if (this.isInRole(roles[i])) {
-        return true;
-      }
-    }
+    let result = (_.has(this._identity, "_roles") && _.isArray(this._identity.roles) && _.isArray(roles)) ? _.some(roles, this.isInRole, this) : false;
 
-    return false;
+    this._log.debug("isInAnyRole :: Is the identity in any of the passed roles?", roles, result)
+
+    return result;
   }
 
   /**
   * Returns true if the role parameter matches one of the user's roles.
   */
   public isInRole(role:string): boolean {
-    if (!this._authenticated || !this._identity.roles) {
-      return false;
-    }
+    this._log.trace("isInRole :: Checking for role membership.");
 
-    return this._identity.roles.indexOf(role) != -1;
+    let result = (_.has(this._identity, "_roles") && _.isArray(this._identity.roles) && _.isString(role)) ? _.contains(this._identity.roles, role) : false;
+
+    this._log.debug("isInRole :: Is the identity a member of the role?", role, result);
+
+    return result;
   }
 
 
@@ -83,6 +93,8 @@ export default class DimPrincipal implements IPrincipal {
   * Extracts the 'bungled' token from a cookie.
   */
   private getTokenFromCookie(cookie: string): string {
+    this._log.trace("getTokenFromCookie :: Getting bungled token from the cookie.");
+
     let cookieObj = this._cookieParser.parse(cookie);
 
     if (_.has(cookieObj, "bungled")) {
@@ -96,183 +108,194 @@ export default class DimPrincipal implements IPrincipal {
   * Extracts the cookie from the browser reference object.
   */
   private getCookieFromReference(ref): ng.IPromise<string> {
-    return this._q(function(resolve, reject) {
+    var self = this;
+    self._log.trace("getCookieFromReference :: Preparing promise to process browser reference.");
+
+    return this._q((resolve, reject) => {
+      self._log.trace("getCookieFromReference :: Executing script against the browser reference.");
       ref.executeScript({
-        code: "document.cookie"
+          code: "document.cookie"
       }, (result) => {
+          self._log.trace("getCookieFromReference :: Processing the cookie.");
+          let cookie = "";
+
           if ((result || "").toString().indexOf("bungled") > -1) {
             if (_.isArray(result) && _.size(result) > 0) {
-              resolve(result[0]);
-              return;
+              cookie = result[0];
             } else if (_.isString(result)) {
-              resolve(result);
-            } else {
-              resolve("");
+              cookie = result;
             }
-          } else {
-            resolve("");
           }
-        });
+
+          self._log.debug("getCookieFromReference :: Result from proccessing cookie from browser reference", cookie);
+          resolve(cookie);
+      });
     });
   }
 
   /**
   * Retrieves the 'bungled' token from Bunige.net, if available.
   */
-  private getBungieNetToken(): ng.IPromise<string> {
+  private async getBungieNetToken(): Promise<string> {
     let self = this;
-    let promise = this._q((resolve, reject) => {
-      self._log.debug("Loading lightweight endpoint from bungie.net");
 
-      // Lightweight endpoint on Bungie.net to get an http response.
-      let ref = window.open('https://www.bungie.net/help', '_blank', 'location=no,hidden=yes');
+    self._log.trace("getBungieNetToken :: Getting token from Bungie.net.");
 
-      ref.addEventListener('loadstop', async function(event) {
-        self._log.debug(event);
-
-        try {
-          let token = await self.getCookieFromReference.bind(self, ref)();
-          resolve(token);
-        } catch (e) {
-          let msg = "There was an error while trying to access the token from Bungie.net.";
-          self._log.error(msg, e);
-          reject(new Error(msg));
-        } finally {
-          ref.close();
-        }
-      });
-
-      ref.addEventListener('loaderror', function(event) {
-        self._log.debug(event);
-
-        let msg = "There was an error loading a page from Bungie.net.";
-
-        self._log.error(msg, event);
-        ref.close();
-        reject(new Error(msg));
-      });
-    })
-    .then(this.getTokenFromCookie.bind(self))
-    .catch((error) => {
-      this._log.error(error);
-
-      return "";
-    });
-
-    return promise;
-  }
-
-  /**
-  * Validates that a token can access the Destiny API.  Necessary since tokens
-  * are on every response from Bungie.net.  Having a 'bungled' token doesn't
-  * guarantee that you can access the Destiny API.
-  */
-  private async isTokenValid(token: string): Promise<any> {
-    let result;
-    let bnetUserData = null;
-    let isValid = false;
-    let tempInstance = this._destinyService.getInstance(token);
-
-    this._log.debug("Testing token to see if it can get data from Bungie.net.");
-
-    tempInstance.token = token;
+    let cookie;
+    let token;
 
     try {
-      result = await tempInstance.getBungieNetUser();
-      isValid = (<any>result.data).ErrorCode === 1;
+      cookie = await this._q<string>((resolve, reject) => {
+        self._log.trace("getBungieNetToken :: Loading lightweight endpoint from bungie.net.");
 
-      if (isValid) {
-        bnetUserData = result.data.Response;
-      }
-    } catch (e) {
-      this._log.error("The token validation request failed", e, result);
-      isValid = false;
+        // Lightweight endpoint on Bungie.net to get an http response.
+        let ref = window.open('https://www.bungie.net/help', '_blank', 'location=no,hidden=yes');
+
+        self._log.trace("getBungieNetToken :: Browser reference opened.");
+        self._log.trace("getBungieNetToken :: Adding 'loadstop' listener to ref.");
+
+        ref.addEventListener('loadstop', async function(event) {
+          self._log.debug("getBungieNetToken :: Within the loadstop event.", event);
+          self._log.trace("getBungieNetToken :: Running script to get document cookie from opened page.");
+
+          try {
+            let token = await self.getCookieFromReference.bind(self, ref)();
+            resolve(token);
+          } catch (err) {
+            self._log.error("getBungieNetToken :: There was an error while trying to access the 'bungled' token from Bungie.net.", err);
+            reject(err);
+          } finally {
+            self._log.trace("getBungieNetToken :: Closing the browser reference.");
+            ref.close();
+            self._log.trace("getBungieNetToken :: Closed the browser reference.");
+          }
+        });
+
+        ref.addEventListener('loaderror', (event) => {
+          let msg = "getBungieNetToken :: There was an error loading a page from Bungie.net.";
+
+          self._log.error(msg, event);
+
+          self._log.trace("getBungieNetToken :: Closing the browser reference.");
+          ref.close();
+          self._log.trace("getBungieNetToken :: Closed the browser reference.");
+
+          reject(new Error(msg));
+        });
+      });
+    } catch (err) {
+      self._log.error("getBungieNetToken :: There was an error getting the cookie from Bungie.net", err);
+      cookie = "";
     }
 
-    return bnetUserData;
+    try {
+      token = await self.getTokenFromCookie(cookie);
+    } catch (err) {
+      self._log.error("getBungieNetToken :: There was an error reading the 'bungled' token from the cookie.", err);
+      token = "";
+    }
+
+    return token;
   }
 
   /**
   * Creates an Identity object based on the available Bungie.net cookie. It will
   * short-circuit if there is an Identity already on the Principal.  The 'force'
-  * argument can be used to make the function to get a new Identity object.
+  * argument can be used to make the function get a new Identity object.
   */
   public async identity(force?: boolean): Promise<IIdentity> {
     let token;
 
     this._log.trace("identity :: Getting an Identity object.");
 
-
-
-                                // self._log.trace("identity :: Getting an Identity object.");
-                                // // Force the resolution of the identy from an available token.
-                                // if (force) {
-                                //     self._log.trace("identity :: Forced to get a new identity object.");
-                                //     self._identity = null;
-                                // }
-
     // Force the resolution of the identy from an available token.
     if (force) {
+      this._log.trace("identity :: Forced to get a new identity object.");
       this._identity = null;
     }
 
     // check and see if we have retrieved the identity data from the server. if we have, reuse it by immediately resolving
     if (!_.isEmpty(this._identity)) {
-      this._log.debug("Found existing identity.");
+      this._log.trace("identity :: Identity defined on principal. Returning identity.");
       return this._identity;
     }
 
     try {
-      this._log.debug("Getting token from Bungie.net.");
+      this._log.trace("identity :: There is no identity object on the principal. Getting the token from bungie.net.");
       token = await this.getBungieNetToken();
-    } catch (e) {
-      this._log.warn("Unable to get a bungie token from Bungie.net.", e);
+    } catch (err) {
+      this._log.info("identity :: There was an exception while retrieving the 'bungled' token from Bungie.net.", err);
     }
 
     try {
       if (_.size(token) > 0) {
-        this._log.debug("A token has been found.", token);
+        this._log.debug("identity :: A 'bungled' token has been found.", token);
 
-        let identity = new BungieIdentity(token);
-        await this.authenticate(identity);
+        // Verify if the token is authorized on Bungie.net to make private API requests.
+        await this.authenticate(new BungieIdentity(token));
+      } else {
+        this._log.info("identity :: Unable to get a 'bungled' token from Bungie.net.");
+        await this.authenticate(null);
       }
-    } catch (e) {
-      console.warn("There was an error getting the identity.", e);
-      this.authenticate(null);
+    } catch (err) {
+      this._log.warn("identity :: There was an error authenticating the identity.", err);
+
+      // Resets the identity to null.
+      await this.authenticate(null);
     }
 
-    return this._identity;
+    return (this._identity);
   }
 
   /**
   * Tests the Identity to see if it is able to access the Destiny API.
   */
-  public async authenticate(identity: IIdentity) {
-    this._log.debug("Authenticating identity.", identity);
+  public async authenticate(identity: IIdentity) : Promise<boolean> {
+    this._log.debug("authenticate :: Authenticating identity.", identity);
 
-    let isValid = false;
+    let hasToken = (_.has(identity, "_token") && _.size(identity.token) > 0);
 
-    if (!_.isEmpty(identity)) {
-      if (!_.isEmpty(identity.token)) {
-        try {
-          let testDestinyService = this._destinyService.getInstance(identity.token);
-          let bungieUserData = await testDestinyService.getBungieNetUser();
-          isValid = (<any>bungieUserData.data).ErrorCode === 1;
-          this._log.debug("Is the identity signed into Bungie.net: ", isValid);
+    this._log.debug("authenticate :: Checking if identity has a token.", hasToken);
 
-          if (isValid) {
-            identity = new BungieIdentity(identity.token, bungieUserData.data.Response);
-          }
-        } catch (e) {
-          this._log.error("There was a problem authenticating the token.", e);
-        } finally {
-          this._authenticated = isValid;
+    if (hasToken) {
+      try {
+        this._identity = identity;
+
+        this._log.trace("authenticate :: Getting an instance of the Destiny API Service for this token.");
+
+        // Get an instance of the Destiny API Service w/ the identity token.
+        let testService = this._destinyService.getInstance(identity.token);
+        // Test a private API request with the new identity token.
+        let bungieUserData = await testService.getBungieNetUser();
+
+        this._log.debug("authenticate :: Recieved Bungie.net user data.", bungieUserData);
+
+        // If it was successful, we have an authenticated identity.
+        let authenticated = !_.isEmpty(bungieUserData);
+
+        this._log.debug("authenticate :: Is the identity signed into Bungie.net: ", authenticated);
+
+        if (authenticated) {
+          this._authenticated = authenticated;
+          // New identity object created with the new user data.
+          this._identity = identity = new BungieIdentity(identity.token, bungieUserData);
+          // Destiny API Service token is updated to the new identity.
+          this._destinyService.token = identity.token;
         }
+      } catch (err) {
+        this._log.debug("authenticate :: There was a problem authenticating the token.", err);
+        this._authenticated = false;
+        this._identity = null;
+        this._destinyService.token = "";
       }
+    } else if (identity === null){
+      this._log.trace("authenticate :: Removing identity.");
+      this._authenticated = false;
+      this._identity = null;
+      this._destinyService.token = "";
     }
 
-    this._identity = identity;
-    this._destinyService.token = (!_.isEmpty(this._identity) && _.has(this._identity, "token")) ? this._identity.token : "";
+    return this._authenticated;
   }
 
   /**

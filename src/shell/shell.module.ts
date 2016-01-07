@@ -5,6 +5,8 @@ import authModule from "../auth/auth.module";
 import utilityModule from "../utility/utility.module";
 import AppCtrl from "./app.controller";
 import SigninCtrl from "./signin.controller";
+import SigninPreloadService from "./signinPreload.service";
+import ItemsCtrl from "./items.controller";
 
 let moduleName = "dimShell";
 
@@ -16,7 +18,9 @@ angular.module(moduleName, [
     utilityModule
   ])
   .controller("dimAppCtrl", AppCtrl)
+  .controller("dimItemsCtrl", ItemsCtrl)
   .controller("dimSigninCtrl", SigninCtrl)
+  .service("dimSigninPreloadService", SigninPreloadService)
   .run(["$log", function($log) {
     $log.info(`Loaded '${ moduleName }' module.`);
   }]);

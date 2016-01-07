@@ -23,6 +23,8 @@
     "./src/bungie/IDestinyService.ts",
     "./src/bungie/destinyService.service.ts",
     "./src/shell/app.controller.ts",
+    "./src/shell/signinPreload.service.ts",
+    "./src/shell/items.controller.ts",
     "./src/shell/signin.controller.ts",
     "./src/shell/shell.module.ts",
     "./src/utility/utility.module.ts",

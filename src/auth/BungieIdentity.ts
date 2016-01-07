@@ -1,4 +1,4 @@
-import IIdentity from "./IIdentity";
+import IIdentity from "./iidentity";
 
 class BungieIdentity implements IIdentity {
   private _token: string;
@@ -7,7 +7,7 @@ class BungieIdentity implements IIdentity {
 
   static $inject = [];
 
-  constructor(token: string, user?) {
+  constructor(token: string, user?: Object) {
     this._token = token;
     this._user = user;
     this._roles.push("Guardian");

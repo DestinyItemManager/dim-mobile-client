@@ -1,16 +1,11 @@
 /// <reference path="../../typings/angularjs/angular.d.ts" />
 
 export default class AppCtrl {
-  static $inject = ["$ionicPlatform", "$cordovaSplashscreen", "$log", "$timeout"];
+  static $inject = ["$ionicPlatform", "$log"];
 
-  constructor($ionicPlatform: ionic.platform.IonicPlatformService, $cordovaSplashscreen, $log, $timeout) {
+  constructor($ionicPlatform: ionic.platform.IonicPlatformService, $log) {
     $ionicPlatform.ready(function() {
-      // Hides splash screen
-      if (window.cordova) {
-        $timeout(function() {
-          $cordovaSplashscreen.hide();
-        }, 1000);
-      } else {
+      if (!window.cordova) {
         $log.getInstance("AppCtrl").debug("constructor :: Cordova not found.");
       }
     });

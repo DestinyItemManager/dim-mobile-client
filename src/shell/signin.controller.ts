@@ -16,6 +16,8 @@ export default class SigninCtrl {
   private _scope: ng.IScope;
   private _state: ng.ui.IStateService;
   private _cookieParser;
+  private _history;
+  private _rootScope;
 
   static $inject = [
     "$http",
@@ -25,7 +27,9 @@ export default class SigninCtrl {
     "dimPrincipal",
     "$scope",
     "$state",
-    "dimCookieParser"];
+    "dimCookieParser",
+  "$ionicHistory",
+"$rootScope"];
 
   constructor($http: ng.IHttpService,
     $q: ng.IQService,
@@ -34,7 +38,9 @@ export default class SigninCtrl {
     principal: DimPrincipal,
     $scope: ng.IScope,
     $state: ng.ui.IStateService,
-    cookieParser) {
+    cookieParser,
+  $ionicHistory,
+$rootScope) {
 
     this._http = $http;
     this._q = $q;
@@ -45,6 +51,8 @@ export default class SigninCtrl {
     this._scope = $scope;
     this._state = $state;
     this._cookieParser = cookieParser;
+    this._history = $ionicHistory;
+    this._rootScope = $rootScope;
   }
 
   /**
@@ -64,15 +72,15 @@ export default class SigninCtrl {
   /**
   * Signs the user into Bungie.net.
   */
-  public processSignout(): ng.IPromise<void> {
-    return this._q<void>((resolve, reject) => {
-      let ref = window.open("https://www.bungie.net/en/User/SignOut/", "_blank", "location=yes,hidden=yes");
-
-      ref.addEventListener("loadstop", function(event) {
-        ref.close();
-        resolve();
-      });
-    });
+  public processSignout() {
+    // return this._q<void>((resolve, reject) => {
+    //   let ref = window.open("https://www.bungie.net/en/User/SignOut/", "_blank", "location=yes,hidden=yes");
+    //
+    //   ref.addEventListener("loadstop", function(event) {
+    //     ref.close();
+    //     resolve();
+    //   });
+    // });
   }
 
   /**
@@ -134,13 +142,18 @@ export default class SigninCtrl {
 
             if (_.size(token) > 0) {
               this._log.debug("Token found; hide the page.", token);
-              deferred.resolve(token);
               ref.close();
+              deferred.resolve(token);
             } else {
               this._log.debug("No token found; show the page.");
               ref.show();
             }
-          });
+          }
+        );
+      });
+
+      ref.addEventListener("loaderror", (event) => {
+        ref.close();
       });
 
       // Handles the closing of the browser reference.  Checks to see if the
@@ -198,7 +211,27 @@ export default class SigninCtrl {
       token = await this.getTokenFromBungieLogin(platform);
 
       if (_.size(token) > 0) {
+        await this._principal.identity(true);
+
+
+
         this._log.info("Login was successful.");
+
+
+
+                        if (this._principal.isAuthenticated) {
+                          this._history.nextViewOptions({
+                            disableBack: true
+                          });
+
+                          if (_.has(this._rootScope, "redirectToState")) {
+                            this._state.go(this._rootScope["redirectToState"].name, this._rootScope["redirectToState"].params)
+                          } else {
+                            this._state.go("welcome");
+                          }
+                        }
+
+
       } else {
         this._log.info("Login was unsuccessful.");
       }
