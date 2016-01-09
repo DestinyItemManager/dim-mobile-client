@@ -24,7 +24,7 @@ The steps to setup DIM on your computer are:
 	>	`tsd install`
 	
 	>	`ionic platform add ios`
-	
+	 
 	>	`ionic platform add android`
 	
 	>	`ionic setup sass`
