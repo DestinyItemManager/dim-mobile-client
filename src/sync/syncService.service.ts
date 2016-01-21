@@ -89,22 +89,24 @@ export default class SyncService implements ISyncService {
 
   // check if the user is authorized with google drive
   public authorize(): ng.IPromise<any> {
+    let self = this;
+
     var deferred = this._q.defer();
 
     // we're a chrome app so we do this
     if(chrome.identity) {
       chrome.identity.getAuthToken({ 'interactive': true }, function(token) {
         if(chrome.runtime.lastError) {
-          this.revokeDrive();
+          self.revokeDrive();
           return;
         }
         gapi.auth.setToken({'access_token': token});
-        this.getFileId().then(deferred.resolve);
+        self.getFileId().then(deferred.resolve);
       });
     } else { // otherwise we do the normal auth flow
-      gapi.auth.authorize(this._drive, function(result) {
+      gapi.auth.authorize(self._drive, function(result) {
         // if no errors, we're good to sync!
-        this._drive.immediate = result && !result.error;
+        self._drive.immediate = result && !result.error;
 
         // resolve promise for errors
         if(!result || result.error) {
@@ -112,7 +114,7 @@ export default class SyncService implements ISyncService {
           return;
         }
 
-        this.getFileId().then(deferred.resolve);
+        self.getFileId().then(deferred.resolve);
       });
     }
 
@@ -149,7 +151,7 @@ export default class SyncService implements ISyncService {
 
     // save to chrome sync
     if(chrome.storage) {
-      chrome.storage.sync.set(this._cached, function() {
+      chrome.storage.sync.set(this._cached, () => {
         console.log('saved to chrome sync.', this._cached);
         if (chrome.runtime.lastError) {
           console.log('error with chrome sync.')
