@@ -1,0 +1,10 @@
+<ion-view view-title="Sync">
+  <ion-content padding="true">
+    <h3>Bungie.net User</h3>
+    <div><span>Display Name:</span> <span>{{ vm.displayName }}</span></div>
+
+    <input ng-if='vm.showSync()' type='button' class='btn' ng-click='vm.driveSync()' value='Sync with Drive' />
+    <div><span ng-if='!vm.showSync()'>Synced!</span></div>
+    <div><span>{{ vm.data }}</span></div>
+  </ion-content>
+</ion-view>
