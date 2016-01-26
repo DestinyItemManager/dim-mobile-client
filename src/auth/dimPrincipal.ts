@@ -171,6 +171,8 @@ export default class DimPrincipal implements IPrincipal {
           }
         });
 
+        self._log.trace("getBungieNetToken :: Adding 'loaderror' listener to ref.");
+
         ref.addEventListener('loaderror', (event) => {
           let msg = "getBungieNetToken :: There was an error loading a page from Bungie.net.";
 
@@ -182,6 +184,13 @@ export default class DimPrincipal implements IPrincipal {
 
           reject(new Error(msg));
         });
+
+        // setTimeout(function(ref) {
+          // self._log.trace("getBungieNetToken :: Reloading.");
+          // ref.executeScript({
+          //     code: "document.location.refresh()"
+          // }, () => {});
+        // }, 5000);
       });
     } catch (err) {
       self._log.error("getBungieNetToken :: There was an error getting the cookie from Bungie.net", err);

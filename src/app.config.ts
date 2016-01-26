@@ -11,7 +11,7 @@ export default function appConfig(
     $stateProvider
       .state("root", {
         abstract: true,
-        template: "<ion-nav-view></ion-nav-view>",
+        templateUrl: 'templates/root.html',
         url: "",
         controller: "dimAppCtrl as app",
       })
@@ -64,7 +64,7 @@ export default function appConfig(
         },
         resolve: {
           identity: ["$state", "$ionicHistory", "$q", "dimPrincipal", "$rootScope", function($state, $ionicHistory, $q, principal, $rootScope) {
-            return $q.when(principal.identity(true))
+            var a = $q.when(principal.identity(true))
               .then(function(identity) {
                 console.debug("preload", identity);
 
@@ -82,6 +82,10 @@ export default function appConfig(
 
                 return identity;
             });
+
+            $rootScope["tracker"].addPromise(a);
+
+            return a;
           }]
         }
       })
@@ -103,13 +107,48 @@ export default function appConfig(
         parent: "menu",
         url: "/signout",
         resolve: {
-          signout: function ($state, $q, $log, $ionicHistory, dimPrincipal) {
+          signout: function ($state, $q, $log, $ionicHistory, dimPrincipal, $rootScope) {
             $log.debug("Signing out.");
-            return $q((resolve, reject) => {
-              let ref = window.open("https://www.bungie.net/en/User/SignOut", "_blank", "location=yes,hidden=yes,clearsessioncache=yes");
+
+            var a = $q((resolve, reject) => {
+              let ref = window.open("https://www.bungie.net/en/User/SignOut", "_blank", "location=yes,hidden=yes");
 
               ref.addEventListener("loadstop", function(event) {
-                ref.close();
+
+                              console.error("Clearing Cookies.");
+
+                              ref.executeScript(
+                                {
+                                  code: `function clearListCookies()
+                    {
+                      var cookies = document.cookie.split(";");
+                      for (var i = 0; i < cookies.length; i++) {
+                        var spcook = cookies[i].split("=");
+                        deleteCookie(spcook[0]);
+                      }
+                      function deleteCookie(cookiename) {
+                        var d = new Date();
+                        d.setDate(d.getDate() - 1);
+                        var expires = ";expires=" + d;
+                        var name = cookiename;
+                        //alert(name);
+                        var value = "";
+                        document.cookie = name + "=" + value + expires + ";";
+                      }
+
+                      window.location.reload(true);
+                    }
+
+                    clearListCookies();`
+                                },
+                                (result) => {
+                                  console.error(JSON.stringify(result));
+                                  ref.close();
+                                }
+                              );
+
+                              console.error("Done Clearing Cookies.");
+
               });
 
               ref.addEventListener("loaderror", function(event) {
@@ -120,6 +159,9 @@ export default function appConfig(
                 resolve();
               });
             })
+            .catch(function(a) {
+              console.error(JSON.stringify(a));
+            })
             .then(function() {
               window["cookies"].clear(function() {
                 console.log("Cookies cleared!");
@@ -127,10 +169,7 @@ export default function appConfig(
             })
             .then(function() {
               return $q(function(resolve, reject) {
-                setTimeout(function() {
-                  dimPrincipal.identity(true);
-                  resolve();
-                }, 50);
+                resolve(dimPrincipal.identity(true));
               });
             })
             .then(function() {
@@ -139,10 +178,11 @@ export default function appConfig(
               });
 
               $state.go("welcome");
-            // .then(function() {
-            //   setTimeout(() => window.location.reload(), 50);
-            // });
           });
+
+          $rootScope["tracker"].addPromise(a);
+
+          return a;
         }
       }
     });

@@ -17,6 +17,7 @@ export default class ItemsCtrl {
   public clanName;
   public clanMotto;
   public now;
+  public nowScope;
 
   private _state;
 
@@ -53,6 +54,7 @@ export default class ItemsCtrl {
         self.clanName = identity.user.clans[0].detail.name;
         self.clanMotto = identity.user.clans[0].detail.motto;
         self.now = (new Date()).toLocaleString();
+        self.nowScope = (new Date()).toLocaleString();
       });
 
     this._scope.$on("$stateChangeSuccess", function updatePage() {

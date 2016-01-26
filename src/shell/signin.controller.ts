@@ -66,21 +66,14 @@ $rootScope) {
   * Signs the user into Bungie.net.
   */
   public signIn(platform: string) {
-    this.processSignin(platform);
+    this._rootScope["tracker"].addPromise(this.processSignin(platform));
   }
 
   /**
   * Signs the user into Bungie.net.
   */
   public processSignout() {
-    // return this._q<void>((resolve, reject) => {
-    //   let ref = window.open("https://www.bungie.net/en/User/SignOut/", "_blank", "location=yes,hidden=yes");
-    //
-    //   ref.addEventListener("loadstop", function(event) {
-    //     ref.close();
-    //     resolve();
-    //   });
-    // });
+
   }
 
   /**
@@ -119,18 +112,40 @@ $rootScope) {
     let token = "";
 
     if (!_.isEmpty(ref)) {
-      this._log.debug("Adding 'loadstop' listener to ref.");
+
+      self._log.debug("Adding 'loadstop' listener to ref.");
+
+      // Handles the closing of the browser reference.  Checks to see if the
+      // token was able to be retrieved from this reference before it was closed.
+      ref.addEventListener("exit", (event) => {
+        self._log.debug("The browser ref is closing.");
+
+        if (_.size(token) === 0) {
+          self._log.debug("There was no token found in browser reference.");
+
+          deferred.resolve("");
+        }
+      });
+
+      self._log.debug("Adding 'loaderror' listener to ref.");
+
+      ref.addEventListener("loaderror", (event) => {
+        self._log.debug("The browser ref had an error.");
+        ref.close();
+      });
+
+      self._log.debug("Adding 'loadstop' listener to ref.");
 
       // Attempts to get a cookie from each page load in the browser reference.
       ref.addEventListener("loadstop", (event) => {
-        this._log.debug("Running script to get document cookie.");
+        self._log.debug("Running script to get document cookie.");
 
         ref.executeScript(
           {
             code: "document.cookie"
           },
           (result) => {
-            this._log.debug("Got the result from the loaded page.");
+            self._log.debug("Got the result from the loaded page.");
 
             if ((result || "").toString().indexOf("bungled") > -1) {
               if (_.isArray(result) && (_.size(result) > 0) && _.isString(result[0])) {
@@ -141,35 +156,19 @@ $rootScope) {
             }
 
             if (_.size(token) > 0) {
-              this._log.debug("Token found; hide the page.", token);
+              self._log.debug("Token found; hide the page.", token);
               ref.close();
               deferred.resolve(token);
             } else {
-              this._log.debug("No token found; show the page.");
+              self._log.debug("No token found; show the page.");
               ref.show();
             }
           }
         );
       });
-
-      ref.addEventListener("loaderror", (event) => {
-        ref.close();
-      });
-
-      // Handles the closing of the browser reference.  Checks to see if the
-      // token was able to be retrieved from this reference before it was closed.
-      ref.addEventListener("exit", (event) => {
-        this._log.debug("The browser ref is closing.");
-
-        if (_.size(token) === 0) {
-          this._log.debug("There was no token found in browser reference.");
-
-          deferred.resolve("");
-        }
-      });
     } else {
       let msg = "The parameter 'ref' was empty.";
-      this._log.debug(msg);
+      self._log.debug(msg);
       deferred.reject(msg);
     }
 
@@ -190,6 +189,10 @@ $rootScope) {
 
     try {
       token = await self.processReference(ref);
+
+      // TODO
+      // If no token, then the signin page could have self-closed if already authenticated and never redirected to bungie.net.
+      // Log into Bunige.net to check for a token if this is the case.
     } catch (err) {
       token = "";
     }
@@ -238,28 +241,5 @@ $rootScope) {
     } catch (err) {
     } finally {
     }
-
-
-
-
-
-    //
-    // return deferred.promise
-    //   .then(function(token) {
-    //     if (token.length > 0) {
-    //       return self._principal.identity(true)
-    //         .then(function(identity) {
-    //           return self._principal.authenticate(identity);
-    //         })
-    //         .then(function() {
-    //           if (self._scope["returnToState"])
-    //             self._state.go(self._scope["returnToState"].name, self._scope["returnToStateParams"]);
-    //           else
-    //             self._state.go("items");
-    //
-    //           return null;
-    //         });
-    //     }
-    //   });
   }
 };

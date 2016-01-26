@@ -13,6 +13,7 @@ let app = angular.module("dimApp",
     "ngCordova",
     "ui.router",
     "angular-logger",
+    "ajoslin.promise-tracker",
     authModule,
     shellModule
   ])
