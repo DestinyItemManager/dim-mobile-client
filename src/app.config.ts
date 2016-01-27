@@ -115,40 +115,41 @@ export default function appConfig(
 
               ref.addEventListener("loadstop", function(event) {
 
-                              console.error("Clearing Cookies.");
+                    //           console.error("Clearing Cookies.");
+                    //
+                    //           ref.executeScript(
+                    //             {
+                    //               code: `function clearListCookies()
+                    // {
+                    //   var cookies = document.cookie.split(";");
+                    //   for (var i = 0; i < cookies.length; i++) {
+                    //     var spcook = cookies[i].split("=");
+                    //     deleteCookie(spcook[0]);
+                    //   }
+                    //   function deleteCookie(cookiename) {
+                    //     var d = new Date();
+                    //     d.setDate(d.getDate() - 1);
+                    //     var expires = ";expires=" + d;
+                    //     var name = cookiename;
+                    //     //alert(name);
+                    //     var value = "";
+                    //     document.cookie = name + "=" + value + expires + ";";
+                    //   }
+                    //
+                    //   window.location.reload(true);
+                    // }
+                    //
+                    // clearListCookies();`
+                    //             },
+                    //             (result) => {
+                    //               console.error(JSON.stringify(result));
+                    //               ref.close();
+                    //             }
+                    //           );
+                    //
+                    //           console.error("Done Clearing Cookies.");
 
-                              ref.executeScript(
-                                {
-                                  code: `function clearListCookies()
-                    {
-                      var cookies = document.cookie.split(";");
-                      for (var i = 0; i < cookies.length; i++) {
-                        var spcook = cookies[i].split("=");
-                        deleteCookie(spcook[0]);
-                      }
-                      function deleteCookie(cookiename) {
-                        var d = new Date();
-                        d.setDate(d.getDate() - 1);
-                        var expires = ";expires=" + d;
-                        var name = cookiename;
-                        //alert(name);
-                        var value = "";
-                        document.cookie = name + "=" + value + expires + ";";
-                      }
-
-                      window.location.reload(true);
-                    }
-
-                    clearListCookies();`
-                                },
-                                (result) => {
-                                  console.error(JSON.stringify(result));
-                                  ref.close();
-                                }
-                              );
-
-                              console.error("Done Clearing Cookies.");
-
+                              ref.close();
               });
 
               ref.addEventListener("loaderror", function(event) {

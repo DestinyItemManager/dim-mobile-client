@@ -140,12 +140,12 @@ $rootScope) {
       ref.addEventListener("loadstop", (event) => {
         self._log.debug("Running script to get document cookie.");
 
-        ref.executeScript(
+        var refResult = ref.executeScript(
           {
             code: "document.cookie"
           },
           (result) => {
-            self._log.debug("Got the result from the loaded page.");
+            self._log.debug("Got the result from the loaded page.", result);
 
             if ((result || "").toString().indexOf("bungled") > -1) {
               if (_.isArray(result) && (_.size(result) > 0) && _.isString(result[0])) {
@@ -165,6 +165,8 @@ $rootScope) {
             }
           }
         );
+
+        self._log.debug("RefResult: ", refResult);
       });
     } else {
       let msg = "The parameter 'ref' was empty.";
