@@ -1,19 +1,20 @@
+/* eslint-env node */
+/* eslint no-console: 0 */
+
 var gulp = require('gulp');
 var gutil = require('gulp-util');
 var bower = require('bower');
-var concat = require('gulp-concat');
 var sass = require('gulp-sass');
 var minifyCss = require('gulp-minify-css');
 var rename = require('gulp-rename');
 var sh = require('shelljs');
 var watch = require('gulp-watch');
 var batch = require('gulp-batch');
-
-var ts = require('gulp-typescript');
+var webpack = require('webpack');
+var webpackConfig = require('./webpack.config.js');
 var babeljs = require('gulp-babel');
 var annotate = require('gulp-ng-annotate');
-var es = require('event-stream');
-var Builder = require('systemjs-builder');
+//var es = require('event-stream');
 var del = require('del');
 var taskListing = require('gulp-task-listing');
 
@@ -27,17 +28,25 @@ gulp.task('default', ['sass', 'build']);
 // Add a task to render the output
 gulp.task('help', taskListing);
 
-gulp.task('build', function(done) {
-  var typescripts = gulp.src('src/**/*.ts')
-    .pipe(ts({
-      target: 'ES6'
-    }));
-  var es6scripts = gulp.src('src/**/*.js');
-
-  return es.merge(typescripts.js, es6scripts)
+gulp.task('build', function() {
+  return gulp.src('src/**/*.js')
     .pipe(babeljs())
     .pipe(annotate())
     .pipe(gulp.dest('www/js'));
+});
+
+gulp.task('webpack', function (callback) {
+  webpack(webpackConfig, function (err, stats) {
+    if (err) {
+      throw new gutil.PluginError('webpack', err);
+    }
+
+    gutil.log('[webpack]', stats.toString({
+      colors: true
+    }));
+
+    callback();
+  });
 });
 
 gulp.task('clean', ['clean-js', 'clean-css']);
@@ -87,8 +96,7 @@ gulp.task('install', ['git-check'], function() {
 
 gulp.task('git-check', function(done) {
   if (!sh.which('git')) {
-    console.log(
-      '  ' + gutil.colors.red('Git is not installed.'),
+    console.log(' ' + gutil.colors.red('Git is not installed.'),
       '\n  Git, the version control system, is required to download Ionic.',
       '\n  Download git here:', gutil.colors.cyan('http://git-scm.com/downloads') + '.',
       '\n  Once git is installed, run \'' + gutil.colors.cyan('gulp install') + '\' again.'
