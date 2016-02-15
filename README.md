@@ -1,56 +1,25 @@
-# Destiny Item Manager
+Ionic App Base
+=====================
 
-## Developer Instructions
+A starting project for Ionic that optionally supports using custom SCSS.
 
-### Setup Your Environment
+## Using this project
 
-The following instructions will assume that you have installed globally and configured the following:
+We recommend using the [Ionic CLI](https://github.com/driftyco/ionic-cli) to create new Ionic projects that are based on this project but use a ready-made starter template.
 
-1. [node & npm](https://nodejs.org)
-2. [bower](https://github.com/bower/bower)
-3. [gulp](https://github.com/gulpjs/gulp/blob/master/docs/getting-started.md)
-4. [tsd](https://github.com/DefinitelyTyped/tsd)
-5. [ionic](http://ionicframework.com/docs/guide/installation.html)
+For example, to start a new Ionic project with the default tabs interface, make sure the `ionic` utility is installed:
 
-The steps to setup DIM on your computer are:
+```bash
+$ npm install -g ionic
+```
 
-1. Clone DIM onto your hard drive.
-2. Run the following commands from your command prompt in the root of the project:
-	
-	>	`npm install`
-	
-	>	`bower install`
-	
-	>	`tsd install`
-	
-	>	`ionic platform add ios`
-	 
-	>	`ionic platform add android`
-	
-	>	`ionic setup sass`
-	
-3. Run DIM on your device or simulator with ionic.
+Then run:
 
-### Gulp Tasks
+```bash
+$ ionic start myProject tabs
+```
 
-While writing code, you'll need to execute gulp tasks to verify your modifcations.  The following tasks are availabe in gulp.
+More info on this can be found on the Ionic [Getting Started](http://ionicframework.com/getting-started) page and the [Ionic CLI](https://github.com/driftyco/ionic-cli) repo.
 
-1. build
-	* Transpiles the TypeScript code to ES2015 JavaScript.
-	* Transpiles the ES2015 JavaScript to ES5 JavaScript.
-	* Bundles the Module syntax of ES2015 to SystemJS.
-2. bundle
-	* Calls the build task.
-	* Bundles the files in the /build folder and published them into the /www/js folder.
-3. clean
-	* Cleans the /build folder.
-	* Cleans the /www/css folder.
-	* There are clean-js and clean-css subtasks.
-3. help
-	* Prints the avilale tasks and sub-tasks in the gulp file.
-4. sass
-	* Builds the css for the application from the /scss files.
-5. watch
-	* Watches the /scss folder for changes and runs the 'sass' task.
-	* Watches the /src folder for changes and runs the 'build' task. 
-	
+## Issues
+Issues have been disabled on this repo, if you do find an issue or have a question consider posting it on the [Ionic Forum](http://forum.ionicframework.com/).  Or else if there is truly an error, follow our guidelines for [submitting an issue](http://ionicframework.com/submit-issue/) to the main Ionic repository.

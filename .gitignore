@@ -6,11 +6,8 @@ typings/
 node_modules/
 platforms/
 plugins/
-www/lib/
-www/js/
-src/**/*.js
-
-www/css/dim.*
+www/**/*.*
+!www/.gitignore
 
 # Compiled source #
 ###################

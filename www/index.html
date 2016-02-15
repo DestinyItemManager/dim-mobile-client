@@ -1,31 +1,26 @@
 <!DOCTYPE html>
 <html>
-
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
-  <title></title>
-
-
-  <!-- compiled css output -->
-  <link href="css/dim.min.css" rel="stylesheet">
-
-  <script src="lib/system.js/dist/system.js"></script>
-  <script src="lib/lodash/lodash.min.js"></script>
-  <script src="lib/ionic/release/js/ionic.bundle.js"></script>
-  <script src="lib/angular-component/dist/angular-component.min.js"></script>
-  <script src="lib/ngCordova/dist/ng-cordova.min.js"></script>
-  <script src="cordova.js"></script>
-  <script src="lib/babel-polyfill/dist/polyfill.min.js"></script>
-  <script src="lib/promise-tracker/promise-tracker.js"></script>
-  <script src="lib/momentjs/min/moment-with-locales.min.js"></script>
-  <script src="lib/sprintf/dist/sprintf.min.js"></script>
-  <script src="lib/angular-logger/dist/angular-logger.min.js"></script>
-</head>
-
-<body>
-  <ion-nav-view></ion-nav-view>
-  <script src="bootstrap-systemjs.js"></script>
-</body>
-
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+    <title>Destiny Item Manager v4</title>
+    <script src="js/vendors.js"></script>
+    <script src="js/polyfill.js"></script>
+    <script src="cordova.js"></script>
+    <script src="js/bundle.js"></script>
+    <style>
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+  display: none !important;
+}
+    </style>
+  </head>
+  <body>
+    <ion-pane class="ng-cloak">
+      <ion-header-bar class="bar-stable">
+        <h1 class="title">Ionic Blank Starter</h1>
+      </ion-header-bar>
+      <ion-content>
+      </ion-content>
+    </ion-pane>
+  </body>
 </html>

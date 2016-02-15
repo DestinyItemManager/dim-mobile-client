@@ -1,13 +1,4 @@
 {
-  "name": "destiny-item-manager",
-  "app_id": "f05fdcf6",
-  "gulpStartupTasks": [
-    "build",
-    "sass",
-    "watch"
-  ],
-  "watchPatterns": [
-    "www/**/*",
-    "!www/lib/**/*"
-  ]
+  "name": "dim-mobile-client",
+  "app_id": ""
 }
