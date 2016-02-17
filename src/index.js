@@ -1,7 +1,7 @@
 import angular from 'angular';
 import dimAppModule from './app/dimApp.module';
 
-import './styles.scss';
+import './content/styles.scss';
 
 // Bootstrap DIM's angular modules.
 angular.element(document).ready(() => {
