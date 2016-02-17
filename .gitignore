@@ -7,7 +7,6 @@ node_modules/
 platforms/
 plugins/
 www/**/*.*
-!www/.gitignore
 
 # Compiled source #
 ###################
