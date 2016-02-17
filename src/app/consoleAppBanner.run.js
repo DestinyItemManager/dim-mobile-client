@@ -10,8 +10,6 @@ function consoleAppBanner($log, $window) {
   } else {
     $log.info(appBannerLofi);
   }
-
-  $log.getInstance('consoleAppBanner').error('Hello %s!', 'World', { 'extra': ['pass-through params'] });
 }
 
 export default consoleAppBanner;

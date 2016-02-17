@@ -61,15 +61,15 @@ module.exports = {
     }]
   },
   output: {
-    //filename: ((build.prod) ? 'js/[name].[chunkhash].js' : 'js/[name].js'),
-    filename: 'js/[name].js',
-    path: dist
+    filename: ((build.prod) ? 'js/[name].[chunkhash].js' : 'js/[name].js'),
+    path: dist,
+    hash: 'chunk'
   },
   plugins: [
     new webpack.optimize.CommonsChunkPlugin('vendors', ((build.prod) ? 'js/vendors.[chunkhash].js' : 'js/vendors.js')),
     new HtmlWebpackPlugin({
       pkg: require('./package.json'),
-      template: 'src/index.html',
+      template: 'src/index.htm',
       filename: 'index.html',
       inject: false
     })

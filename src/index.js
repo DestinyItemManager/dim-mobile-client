@@ -1,5 +1,5 @@
 import angular from 'angular';
-import dimAppModule from './dimApp.module';
+import dimAppModule from './app/dimApp.module';
 
 import './styles.scss';
 
