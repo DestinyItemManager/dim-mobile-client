@@ -22,12 +22,27 @@ $dim-background: #181F27;
 $dim-text: #FFCE1F;
 
 $base-background-color: $dim-background;
+$base-color: $dim-text;
 
 $button-stable-bg: $dim-background !default;
 $button-stable-text: $dim-text !default;
 $button-stable-border: $dim-background !default;
 $button-stable-active-bg: $dim-background !default;
 $button-stable-active-border: $dim-background !default;
+
+$menu-bg: $dim-background;
+
+$item-light-text: $base-color;
+$item-light-bg: $dim-background;
+$item-light-border: darken($item-light-bg, 2%);
+$item-light-active-bg: lighten($item-light-bg, 1%) !default;
+$item-light-active-border: lighten($item-light-border, 1%) !default;
+
+$item-default-active-bg:          $item-light-active-bg !default;
+$item-default-active-border:      $item-light-active-border !default;
+
+$item-divider-color: darken($item-light-bg, 2%);
+
 
 // Include all of Ionic
 @import "~ionic-sdk/scss/ionic.scss";

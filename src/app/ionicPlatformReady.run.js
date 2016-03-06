@@ -10,7 +10,7 @@ function ionicPlatformReady($window, $ionicPlatform, $cordovaKeyboard, $cordovaS
 
       if($cordovaStatusbar) {
         $cordovaStatusbar.overlaysWebView(true);
-        $cordovaStatusbar.style(0); // Default style.
+        $cordovaStatusbar.style(1); // Default style.
       }
     }
   });

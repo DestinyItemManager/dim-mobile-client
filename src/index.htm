@@ -10,15 +10,8 @@
 }
     </style>
   </head>
-  <body>
-    <ion-nav-view class="ng-cloak"></ion-nav-view>
-    <!-- <ion-pane class="ng-cloak">
-      <ion-header-bar class="bar-stable">
-        <h1 class="title">DIM</h1>
-      </ion-header-bar>
-      <ion-content>
-      </ion-content>
-    </ion-pane> -->
+  <body class="ng-cloak">
+    <ion-nav-view></ion-nav-view>
     <script src="<%= htmlWebpackPlugin.files.chunks['vendors'].entry %>"></script>
     <script src="<%= htmlWebpackPlugin.files.chunks['polyfill'].entry %>"></script>
     <script src="cordova.js"></script>

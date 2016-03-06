@@ -1,14 +1,14 @@
-import appBanner from './app-banner.html';
-import appBannerLofi from './app-banner-lofi.html';
+import appBannerAsciiArt from './appBannerAsciiArt.html';
+import appBannerText from './appBannerText.html';
 
 function consoleAppBanner($log, $window) {
   'ngInject';
 
   // DIM Console Banner
   if ($window.chrome) {
-    $log.info('%c' + appBanner, 'font-family: monospace');
+    $window.console.info(appBannerAsciiArt, 'color: #E8A534;', 'color: black;', 'color: #E8A534;', 'color: black;', 'color: #E8A534;', 'color: black;', 'color: #E8A534;', 'color: black;', 'color: #E8A534;', 'color: black;', 'color: #E8A534;', 'color: black;', 'color: #E8A534;', 'color: black;', 'color: #E8A534;', 'color: black;', 'color: #E8A534;', 'color: black;', 'color: #E8A534;', 'color: black;', 'color: #E8A534;', 'color: black;', 'color: #E8A534;', 'color: black;', 'color: #E8A534;', 'color: black;', 'color: #E8A534;', 'color: black;', 'color: #E8A534;', 'color: black;', 'color: #E8A534;', 'color: black;', 'color: #E8A534;', 'color: black;', 'color: #E8A534;', 'color: black;', 'color: #E8A534;', 'color: black;', 'color: #E8A534;', 'color: black;', 'color: #E8A534;', 'color: black;', 'color: #E8A534;', 'color: black;', 'color: #E8A534;', 'color: black;', 'color: #E8A534;', 'color: black;', 'color: #E8A534;', 'color: black;');
   } else {
-    $log.info(appBannerLofi);
+    $log.info(appBannerText);
   }
 }
 

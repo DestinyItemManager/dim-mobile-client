@@ -1,5 +1,6 @@
 function config(logEnhancerProvider) {
-  //logEnhancerProvider.prefixPattern = '%s - %s: ';
+  'ngInject';
+
   logEnhancerProvider.datetimePattern = 'YYYY-MM-DD HH:mm:ss';
 }
 

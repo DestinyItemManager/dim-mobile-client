@@ -21,7 +21,8 @@ module.exports = {
       'angular-sanitize',
       'angular-ui-router',
       'ionic-angular',
-      'ng-cordova'
+      'ng-cordova',
+      'lodash'
     ],
     polyfill: 'babel-polyfill',
     bundle: path.resolve(src, 'index.js')
@@ -35,8 +36,7 @@ module.exports = {
       test: /\.js$/,
       exclude: [path.resolve(root, 'node_modules')],
       loaders: [
-        'babel',
-        'eslint'
+        'babel'
       ]
     }, {
       test: /\.scss$/,
@@ -76,7 +76,7 @@ module.exports = {
   ],
   resolve: {
     alias: { // If the the key ends with $ only the exact match (without the $) will be replaced.
-      'ionic$': 'ionic-sdk/release/js/ionic.js',
+      'ionic': 'ionic-sdk/release/js/ionic.js',
       'ionic-angular': 'ionic-sdk/release/js/ionic-angular.js'
     }
   }
