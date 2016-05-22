@@ -47,6 +47,12 @@ class MyApp {
 
     this.auth.load();
 
+    this.auth.isLoggedIn().then((response) => {
+      console.log(response);
+    }, (error) => {
+      console.log(error);
+    });
+
     // this.auth.loggedIn()
     //     .then(result => {
     //         if (result) {

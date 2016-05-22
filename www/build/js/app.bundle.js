@@ -63,6 +63,12 @@ var MyApp = (_dec = (0, _ionicAngular.App)({
 
     this.auth.load();
 
+    this.auth.isLoggedIn().then(function (response) {
+      console.log(response);
+    }, function (error) {
+      console.log(error);
+    });
+
     // this.auth.loggedIn()
     //     .then(result => {
     //         if (result) {
@@ -233,7 +239,7 @@ var WelcomePage = exports.WelcomePage = (_dec = (0, _ionicAngular.Page)({
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 exports.AuthProvider = undefined;
 
@@ -242,6 +248,8 @@ var _createClass = function () { function defineProperties(target, props) { for 
 var _dec, _class;
 
 var _core = require('@angular/core');
+
+var _ionicAngular = require('ionic-angular');
 
 var _http = require('@angular/http');
 
@@ -258,37 +266,61 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   for more info on providers and Angular 2 DI.
 */
 var AuthProvider = exports.AuthProvider = (_dec = (0, _core.Injectable)(), _dec(_class = function () {
-    _createClass(AuthProvider, null, [{
-        key: 'parameters',
-        get: function get() {
-            return [[_http.Http]];
-        }
-    }]);
-
-    function AuthProvider(http) {
-        _classCallCheck(this, AuthProvider);
-
-        this.http = http;
-        this.data = null;
-        this._loggedInSource = new _Subject.Subject();
-        this.loggedInSrc = this._loggedInSource.asObservable();
+  _createClass(AuthProvider, null, [{
+    key: 'parameters',
+    get: function get() {
+      return [[_http.Http], [_ionicAngular.Platform]];
     }
+  }]);
 
-    _createClass(AuthProvider, [{
-        key: 'load',
-        value: function load() {
-            var _this = this;
+  function AuthProvider(http, platform) {
+    _classCallCheck(this, AuthProvider);
 
-            window.setTimeout(function () {
-                _this._loggedInSource.next(true);
-            }, 2000);
-        }
-    }]);
+    this.http = http;
+    this.platform = platform;
+    this.data = null;
+    this._loggedInSource = new _Subject.Subject();
+    this.loggedInSrc = this._loggedInSource.asObservable();
+  }
 
-    return AuthProvider;
+  _createClass(AuthProvider, [{
+    key: 'isLoggedIn',
+    value: function isLoggedIn() {
+      return this.platform.ready().then(function () {
+        return new Promise(function (resolve, reject) {
+          var ref = cordova.InAppBrowser.open('https://www.bungie.net/help', '_blank', 'location=no,hidden=yes');
+          ref.addEventListener('loadstop', function (event) {
+            try {
+              resolve(event);
+            } catch (err) {
+              reject("err");
+            } finally {
+              ref.close();
+            }
+          });
+
+          ref.addEventListener('loaderror', function (event) {
+            reject("loaderror");
+            ref.close();
+          });
+        });
+      });
+    }
+  }, {
+    key: 'load',
+    value: function load() {
+      var _this = this;
+
+      window.setTimeout(function () {
+        _this._loggedInSource.next(true);
+      }, 2000);
+    }
+  }]);
+
+  return AuthProvider;
 }()) || _class);
 
-},{"@angular/core":140,"@angular/http":216,"rxjs/Subject":480,"rxjs/add/operator/map":537}],8:[function(require,module,exports){
+},{"@angular/core":140,"@angular/http":216,"ionic-angular":389,"rxjs/Subject":480,"rxjs/add/operator/map":537}],8:[function(require,module,exports){
 "use strict";
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
