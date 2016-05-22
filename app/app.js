@@ -47,7 +47,7 @@ class MyApp {
 
     this.auth.load();
 
-    this.auth.isLoggedIn().then((response) => {
+    this.auth.getRemoteLoginStatus().then((response) => {
       console.log(response);
     }, (error) => {
       console.log(error);
