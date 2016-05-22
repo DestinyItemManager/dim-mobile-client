@@ -30,7 +30,7 @@ export class AuthProvider {
         return new Promise((resolve, reject) => {
           let ref = cordova.InAppBrowser.open('https://www.bungie.net/help', '_blank', 'location=no,hidden=yes');
           ref.addEventListener('loadstop', (event) => {
-            try {
+            try { 
               resolve(event);
             } catch (err) {
               reject("err");
