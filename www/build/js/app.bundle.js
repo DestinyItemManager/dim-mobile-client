@@ -41,8 +41,6 @@ var MyApp = (_dec = (0, _ionicAngular.App)({
   }]);
 
   function MyApp(platform, menu, auth) {
-    var _this = this;
-
     _classCallCheck(this, MyApp);
 
     this.platform = platform;
@@ -53,21 +51,28 @@ var MyApp = (_dec = (0, _ionicAngular.App)({
     // set our app's pages
     this.pages = [{ title: 'Welcome', component: _welcome.WelcomePage }, { title: 'Items', component: _items.ItemsPage }, { title: 'Settings', component: _settings.SettingsPage }];
 
-    auth.loggedInSrc.subscribe(function (result) {
-      if (result) {
-        _this.pages.push({ title: 'Sign In', component: _signIn.SignInPage });
-      } else {
-        _this.pages.push({ title: 'Sign Out', component: _signOut.SignOutPage });
-      }
-    });
+    // auth.loggedInSrc.subscribe(
+    //   result => {
+    //     if (result) {
+    //       this.pages.push({ title: 'Sign In', component: SignInPage });
+    //     } else {
+    //       this.pages.push({ title: 'Sign Out', component: SignOutPage });
+    //     }
+    //   });
 
-    this.auth.load();
+    // this.auth.load();
 
-    this.auth.getRemoteLoginStatus().then(function (response) {
+    this.auth.getBungleToken().then(function (response) {
       console.log(response);
     }, function (error) {
       console.log(error);
     });
+
+    // this.auth.getRemoteLoginStatus().then((response) => {
+    //   console.log(response);
+    // }, (error) => {
+    //   console.log(error);
+    // });
 
     // this.auth.loggedIn()
     //     .then(result => {
@@ -243,6 +248,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.AuthProvider = undefined;
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _dec, _class;
@@ -263,7 +270,7 @@ var _ = _interopRequireWildcard(_lodash);
 
 var _cookie = require('cookie');
 
-var cookie = _interopRequireWildcard(_cookie);
+var cookieParser = _interopRequireWildcard(_cookie);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -288,62 +295,115 @@ var AuthProvider = exports.AuthProvider = (_dec = (0, _core.Injectable)(), _dec(
 
     this.http = http;
     this.platform = platform;
+    this.storage = new _ionicAngular.Storage(_ionicAngular.SqlStorage);
     this.data = null;
     this._loggedInSource = new _Subject.Subject();
     this.loggedInSrc = this._loggedInSource.asObservable();
+
+    this.InAppBrowserEvents = {
+      loadstart: 'loadstart',
+      loadstop: 'loadstop',
+      loaderror: 'loaderror',
+      exit: 'exit'
+    };
   }
 
   _createClass(AuthProvider, [{
-    key: 'getRemoteLoginStatus',
-    value: function getRemoteLoginStatus() {
+    key: 'getBungleToken',
+    value: function getBungleToken() {
+      var _this = this;
+
       var self = this;
+
+      return this.platform.ready().then(function () {
+        return _this.storage.remove('bungie-token');
+      }).then(function () {
+        return _this.storage.get('bungie-token');
+      }).then(function (result) {
+        if (!_.isEmpty(result)) {
+          debugger;
+          return result;
+        } else {
+          var _ret = function () {
+            var _token = '';
+            return {
+              v: self.getBungleTokenFromBungie().then(function (token) {
+                _token = token;
+                return _this.storage.set('bungie-token', token);
+              }).then(function () {
+                return _token;
+              }).catch(function (error) {
+                debugger;
+                throw new error(error);
+              })
+            };
+          }();
+
+          if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+        }
+      }).catch(function (error) {
+        debugger;
+      });
+    }
+  }, {
+    key: 'getBungleTokenFromBungie',
+    value: function getBungleTokenFromBungie() {
+      var self = this;
+
       return this.platform.ready().then(function () {
         return new Promise(function (resolve, reject) {
+          // Open a hidden browser to Bungie.net to get the user's token from the cookie.
           var ref = cordova.InAppBrowser.open('https://www.bungie.net/help', '_blank', 'location=no,hidden=yes');
 
-          ref.addEventListener('loadstop', function (event) {
-            var loop = setInterval(function () {
-              ref.executeScript({
-                code: "document.cookie"
-              }, function (result) {
-                var cookieValue = "";
+          // When the page has stopped loading...
+          ref.addEventListener(self.InAppBrowserEvents.loadstop, function (event) {
+            // Attempt to get the cookie...
+            ref.executeScript({ code: 'document.cookie' }, function (result) {
+              // If successful, we should have a cookie in the result.
+              try {
+                if (_.isArray(result) && _.size(result) > 0) {
+                  var cookie = cookieParser.parse(result[0]);
 
-                if ((result || "").toString().indexOf("bungled") > -1) {
-                  if (_.isArray(result) && _.size(result) > 0) {
-                    cookieValue = result[0];
-                  } else if (_.isString(result)) {
-                    cookieValue = result;
+                  if (_.has(cookie, 'bungled')) {
+                    resolve(cookie.bungled);
+                  } else {
+                    // Cookie did not contain a bungled token. Unexepected...
+                    reject('');
                   }
+                } else {
+                  // No result was returned from executeScript. Unexepected...
+                  reject('');
                 }
-
-                var cookieObject = cookie.parse(cookieValue);
-
-                try {
-                  resolve(cookieObject['bungled']);
-                } catch (err) {
-                  reject("no cookie.");
-                }
-
-                clearInterval(loop);
+              } catch (e) {
+                // Very unexepected...
+                reject('');
+              } finally {
                 ref.close();
-              });
+                ref = undefined;
+              }
             });
           });
 
-          ref.addEventListener('loaderror', function (event) {
-            reject("loaderror");
+          ref.addEventListener(self.InAppBrowserEvents.loaderror, function (event) {
+            reject('');
             ref.close();
+            ref = undefined;
           });
         });
       });
     }
   }, {
+    key: 'getRemoteLoginStatus',
+    value: function getRemoteLoginStatus() {
+      return getBungleTokenFromBungie();
+    }
+  }, {
     key: 'load',
     value: function load() {
-      var _this = this;
+      var _this2 = this;
 
       window.setTimeout(function () {
-        _this._loggedInSource.next(true);
+        _this2._loggedInSource.next(true);
       }, 2000);
     }
   }]);

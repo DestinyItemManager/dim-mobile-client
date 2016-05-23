@@ -33,25 +33,33 @@ class MyApp {
       { title: 'Welcome', component: WelcomePage },
       { title: 'Items', component: ItemsPage },
       { title: 'Settings', component: SettingsPage }
-        ];
+    ];
 
 
-    auth.loggedInSrc.subscribe(
-      result => {
-        if (result) {
-          this.pages.push({ title: 'Sign In', component: SignInPage });
-        } else {
-          this.pages.push({ title: 'Sign Out', component: SignOutPage });
-        }
+    // auth.loggedInSrc.subscribe(
+    //   result => {
+    //     if (result) {
+    //       this.pages.push({ title: 'Sign In', component: SignInPage });
+    //     } else {
+    //       this.pages.push({ title: 'Sign Out', component: SignOutPage });
+    //     }
+    //   });
+
+    // this.auth.load();
+
+    this.auth.getBungleToken()
+      .then((response) => {
+        console.log(response);
+      }, (error) => {
+        console.log(error);
       });
 
-    this.auth.load();
 
-    this.auth.getRemoteLoginStatus().then((response) => {
-      console.log(response);
-    }, (error) => {
-      console.log(error);
-    });
+    // this.auth.getRemoteLoginStatus().then((response) => {
+    //   console.log(response);
+    // }, (error) => {
+    //   console.log(error);
+    // });
 
     // this.auth.loggedIn()
     //     .then(result => {
