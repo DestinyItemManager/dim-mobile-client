@@ -39,14 +39,10 @@ export class AuthProvider {
 
     return this.platform.ready()
       .then(() => {
-        return this.storage.remove('bungie-token');
-      })
-      .then(() => {
-        return this.storage.get('bungie-token');
+        return self.storage.get('bungie-token');
       })
       .then((result) => {
         if (!_.isEmpty(result)) {
-          debugger;
           return result;
         } else {
           let _token = '';
@@ -59,13 +55,12 @@ export class AuthProvider {
               return _token;
             })
             .catch((error) => {
-              debugger;
-              throw new error(error);
+              throw error;
             });
         }
       })
       .catch((error) => {
-        debugger;
+        throw error;
       });
   }
 

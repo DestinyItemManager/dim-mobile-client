@@ -316,12 +316,9 @@ var AuthProvider = exports.AuthProvider = (_dec = (0, _core.Injectable)(), _dec(
       var self = this;
 
       return this.platform.ready().then(function () {
-        return _this.storage.remove('bungie-token');
-      }).then(function () {
-        return _this.storage.get('bungie-token');
+        return self.storage.get('bungie-token');
       }).then(function (result) {
         if (!_.isEmpty(result)) {
-          debugger;
           return result;
         } else {
           var _ret = function () {
@@ -333,8 +330,7 @@ var AuthProvider = exports.AuthProvider = (_dec = (0, _core.Injectable)(), _dec(
               }).then(function () {
                 return _token;
               }).catch(function (error) {
-                debugger;
-                throw new error(error);
+                throw error;
               })
             };
           }();
@@ -342,7 +338,7 @@ var AuthProvider = exports.AuthProvider = (_dec = (0, _core.Injectable)(), _dec(
           if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
         }
       }).catch(function (error) {
-        debugger;
+        throw error;
       });
     }
   }, {
