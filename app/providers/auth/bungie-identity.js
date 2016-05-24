@@ -15,5 +15,3 @@ export class BungieIdentity {
     return this._data;
   }
 }
-
-export default BungieIdentity;

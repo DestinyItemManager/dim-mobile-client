@@ -1,36 +1,53 @@
-import {Injectable} from '@angular/core';
-import {Http} from '@angular/http';
+import { Injectable } from '@angular/core';
+import { Headers, Http, RequestMethod, RequestOptions } from '@angular/http';
 import 'rxjs/add/operator/map';
+import { DimPrincipal } from '../auth/dim-principal';
 
-/*
-  Generated class for the DestinyServiceProvider provider.
-
-  See https://angular.io/docs/ts/latest/guide/dependency-injection.html
-  for more info on providers and Angular 2 DI.
-*/
 @Injectable()
-export class DestinyServiceProvider {
-  static get parameters(){
-    return [[Http]]
+export class DestinyServices {
+  static get parameters() {
+    return [[Http], [DimPrincipal]]
   }
 
-  constructor(http) {
-    this.http = http;
-    this.data = null;
+  constructor(http, principal) {
+    this._http = http;
+    this._principal = principal;
+    // TODO: If the principal is passed, create a relationship with an observable.
+    this._apiKey = '57c5ff5864634503a0340ffdfbeb20c0';
+    this._token = '';
+    this.data= null;
   }
 
-  load() {
-    if (this.data) {
-      // already loaded data
-      return Promise.resolve(this.data);
+  get token() {
+    if (_.isUndefined(this._principal)) {
+      return this._token;
+    } else {
+      return this._principal.identity.token;
     }
+  }
 
-    // don't have the data yet
+  set token(token) {
+    this._token = token;
+  }
+
+  getBungieNetUser() {
     return new Promise(resolve => {
-      // We're using Angular Http provider to request the data,
-      // then on the response it'll map the JSON data to a parsed JS object.
-      // Next we process the data and resolve the promise with the new data.
-      this.http.get('path/to/data.json')
+      // request = {
+      //   method: 'GET',
+      //   url: 'https://www.bungie.net/Platform/User/GetBungieNetUser/',
+      //   headers: {
+      //     'X-API-Key': this.apiKey,
+      //     'x-csrf': this.token
+      //   },
+      //   withCredentials: true
+      // };
+      let options = new RequestOptions();
+
+      options.headers = new Headers();
+      options.headers.append('X-API-Key', this._apiKey);
+      options.headers.append('x-csrf', this.token);
+
+      this._http.get('https://www.bungie.net/Platform/User/GetBungieNetUser/', options)
         .map(res => res.json())
         .subscribe(data => {
           // we've got back the raw data, now generate the core schedule data

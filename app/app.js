@@ -6,21 +6,21 @@ import { ItemsPage } from './pages/items/items';
 import { SettingsPage } from './pages/settings/settings';
 import { SignInPage } from './pages/sign-in/sign-in';
 import { SignOutPage } from './pages/sign-out/sign-out';
-import { AuthProvider } from './providers/auth/auth';
+import { AuthServices } from './providers/auth/auth-services';
 import { DimPrincipal } from './providers/auth/dim-principal';
-
+import { DestinyServices } from './providers/destiny-services/destiny-services';
 
 @App({
   templateUrl: 'build/app.html',
   config: {}, // http://ionicframework.com/docs/v2/api/config/Config/,
-  providers: [AuthProvider, DimPrincipal],
+  providers: [AuthServices, DimPrincipal, DestinyServices],
   queries: {
     nav: new ViewChild('content')
   }
 })
 class MyApp {
   static get parameters() {
-    return [[Platform], [MenuController], [AuthProvider]];
+    return [[Platform], [MenuController], [AuthServices]];
   }
 
   constructor(platform, menu, auth) {
@@ -51,6 +51,7 @@ class MyApp {
     this.auth.principal.identity()
       .then((response) => {
         console.log(response);
+        this.auth.showLogin();
       }, (error) => {
         console.log(error);
       });
