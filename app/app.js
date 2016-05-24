@@ -7,12 +7,13 @@ import { SettingsPage } from './pages/settings/settings';
 import { SignInPage } from './pages/sign-in/sign-in';
 import { SignOutPage } from './pages/sign-out/sign-out';
 import { AuthProvider } from './providers/auth/auth';
+import { DimPrincipal } from './providers/auth/dim-principal';
 
 
 @App({
   templateUrl: 'build/app.html',
   config: {}, // http://ionicframework.com/docs/v2/api/config/Config/,
-  providers: [AuthProvider],
+  providers: [AuthProvider, DimPrincipal],
   queries: {
     nav: new ViewChild('content')
   }
@@ -47,7 +48,7 @@ class MyApp {
 
     // this.auth.load();
 
-    this.auth.getBungleToken()
+    this.auth.principal.identity()
       .then((response) => {
         console.log(response);
       }, (error) => {
