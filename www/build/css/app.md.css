@@ -8966,3 +8966,12 @@ div.selection {
   display: block;
   text-align: center;
   padding-top: 5%; }
+
+.app-landing .dim-logo {
+  margin-top: 10rem; }
+
+.app-landing .landing-dim-brand {
+  margin-top: 3rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 2rem; }

@@ -1,10 +1,12 @@
 import { ViewChild } from '@angular/core';
-import { App, Platform, MenuController } from 'ionic-angular';
+import { App, Platform, MenuController, Modal, NavController } from 'ionic-angular';
 import { StatusBar } from 'ionic-native';
+import { AppLandingPage } from './pages/app-landing/app-landing';
 import { WelcomePage } from './pages/welcome/welcome';
 import { ItemsPage } from './pages/items/items';
 import { SettingsPage } from './pages/settings/settings';
 import { SignInPage } from './pages/sign-in/sign-in';
+import { SignInModalPage } from './pages/sign-in-modal/sign-in-modal';
 import { SignOutPage } from './pages/sign-out/sign-out';
 import { AuthServices } from './providers/auth/auth-services';
 import { DimPrincipal } from './providers/auth/dim-principal';
@@ -35,6 +37,8 @@ class MyApp {
       { title: 'Items', component: ItemsPage },
       { title: 'Settings', component: SettingsPage }
     ];
+    
+    this.rootPage = AppLandingPage;
 
 
     // auth.loggedInSrc.subscribe(
@@ -48,13 +52,15 @@ class MyApp {
 
     // this.auth.load();
 
-    this.auth.principal.identity()
-      .then((response) => {
-        console.log(response);
-        this.auth.showLogin();
-      }, (error) => {
-        console.log(error);
-      });
+    // this.platform.ready()
+    // this.auth.principal.identity()
+    //   .then((response) => {
+    //
+    //     //console.log(response);
+    //     //this.auth.showLogin();
+    //   }, (error) => {
+    //     console.log(error);
+    //   });
 
 
     // this.auth.getRemoteLoginStatus().then((response) => {
@@ -71,9 +77,6 @@ class MyApp {
     //             this.pages.push({ title: 'Sign Out', component: SignOutPage });
     //         }
     //     });
-
-    // make HelloIonicPage the root (or first) page
-    this.rootPage = WelcomePage;
   }
 
   initializeApp() {
@@ -82,13 +85,24 @@ class MyApp {
         // Okay, so the platform is ready and our plugins are available.
         // Here you can do any higher level native things you might need.
         StatusBar.styleDefault();
+
+        //  this.auth.principal.identity();
+          // .then((response) => {
+          //   if (_.isNull(response) || !this.auth.principal.isAuthenticated) {
+          //     // this.rootPage = SignInPage;
+          //     let modal = Modal.create(SignInModalPage);
+          //     this.nav.present(modal)
+          //   }
+          // }, (error) => {
+          //   console.log(error);
+          // });
       });
   }
 
   openPage(page) {
     // close the menu when clicking a link from the menu
-    // this.menu.close();
-    this.menu.open();
+    this.menu.close();
+    // this.menu.open();
     // navigate to the new page if it is not the current page
     this.nav.setRoot(page.component);
   }

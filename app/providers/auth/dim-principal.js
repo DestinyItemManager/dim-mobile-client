@@ -86,7 +86,7 @@ export class DimPrincipal {
       test_identity_service.getBungieNetUser()
         .then((result) => {
           console.log(result);
-          
+
           if (result.ErrorCode === 1) {
             this._authenticated = true;
             this._identity._data = result.Response;
@@ -122,6 +122,10 @@ export class DimPrincipal {
               throw error;
             });
         }
+      })
+      .then((token) => {
+        console.log(token);
+        return token;
       })
       .catch((error) => {
         throw error;
