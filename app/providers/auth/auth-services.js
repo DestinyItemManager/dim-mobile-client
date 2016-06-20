@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, EventEmitter } from '@angular/core';
 import * as _ from 'lodash';
 import { Subject } from 'rxjs/Subject';
 import { DimPrincipal } from './dim-principal';
@@ -13,9 +13,7 @@ export class AuthServices {
 
   constructor(principal) {
     this.principal = principal;
-
-    this._loggedInSource = new Subject();
-    this.loggedInSrc = this._loggedInSource.asObservable();
+    this.loginEvent = new EventEmitter();
 
     this._inAppBrowserEvents = {
       loadstart: 'loadstart',
@@ -28,6 +26,11 @@ export class AuthServices {
   getSigninPlatform() {
     return 'Xuid';
   }
+
+  showLoginDialog() {
+    this.loginEvent.next();
+  }
+
 
   showLogin(platform) {
     let ref = cordova.InAppBrowser.open(`https://www.bungie.net/en/User/SignIn/${ this.getSigninPlatform(platform) }`, '_blank', 'location=yes');
@@ -56,11 +59,5 @@ export class AuthServices {
         }
       );
     });
-  }
-
-  load() {
-    window.setTimeout(() => {
-      this._loggedInSource.next(true)
-    }, 2000);
   }
 }

@@ -21,8 +21,6 @@ var _settings = require('./pages/settings/settings');
 
 var _signIn = require('./pages/sign-in/sign-in');
 
-var _signInModal = require('./pages/sign-in-modal/sign-in-modal');
-
 var _signOut = require('./pages/sign-out/sign-out');
 
 var _authServices = require('./providers/auth/auth-services');
@@ -30,6 +28,8 @@ var _authServices = require('./providers/auth/auth-services');
 var _dimPrincipal = require('./providers/auth/dim-principal');
 
 var _destinyServices = require('./providers/destiny-services/destiny-services');
+
+var _signInModal = require('./pages/sign-in-modal/sign-in-modal');
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -49,6 +49,8 @@ var MyApp = (_dec = (0, _ionicAngular.App)({
   }]);
 
   function MyApp(platform, menu, auth) {
+    var _this = this;
+
     _classCallCheck(this, MyApp);
 
     this.platform = platform;
@@ -56,46 +58,24 @@ var MyApp = (_dec = (0, _ionicAngular.App)({
     this.auth = auth;
     this.initializeApp();
 
+    // Wireup Login Modal w/ event from AuthService
+    this.loginEventSubscription = this.auth.loginEvent.subscribe(function (data) {
+      _this.showLogin();
+    });
+
+    // Check to see if the user has previously logged into Bungie.net
+    this.auth.principal.identity().then(function (response) {
+      if (_this.auth.principal.isAuthenticated) {
+        _this.rootPage = _items.ItemsPage;
+      } else {
+        _this.auth.showLoginDialog();
+      }
+    }, function (error) {
+      console.log(error);
+    });
+
     // set our app's pages
     this.pages = [{ title: 'Welcome', component: _welcome.WelcomePage }, { title: 'Items', component: _items.ItemsPage }, { title: 'Settings', component: _settings.SettingsPage }];
-
-    this.rootPage = _appLanding.AppLandingPage;
-
-    // auth.loggedInSrc.subscribe(
-    //   result => {
-    //     if (result) {
-    //       this.pages.push({ title: 'Sign In', component: SignInPage });
-    //     } else {
-    //       this.pages.push({ title: 'Sign Out', component: SignOutPage });
-    //     }
-    //   });
-
-    // this.auth.load();
-
-    // this.platform.ready()
-    // this.auth.principal.identity()
-    //   .then((response) => {
-    //
-    //     //console.log(response);
-    //     //this.auth.showLogin();
-    //   }, (error) => {
-    //     console.log(error);
-    //   });
-
-    // this.auth.getRemoteLoginStatus().then((response) => {
-    //   console.log(response);
-    // }, (error) => {
-    //   console.log(error);
-    // });
-
-    // this.auth.loggedIn()
-    //     .then(result => {
-    //         if (result) {
-    //             this.pages.push({ title: 'Sign In', component: SignInPage });
-    //         } else {
-    //             this.pages.push({ title: 'Sign Out', component: SignOutPage });
-    //         }
-    //     });
   }
 
   _createClass(MyApp, [{
@@ -105,17 +85,6 @@ var MyApp = (_dec = (0, _ionicAngular.App)({
         // Okay, so the platform is ready and our plugins are available.
         // Here you can do any higher level native things you might need.
         _ionicNative.StatusBar.styleDefault();
-
-        //  this.auth.principal.identity();
-        // .then((response) => {
-        //   if (_.isNull(response) || !this.auth.principal.isAuthenticated) {
-        //     // this.rootPage = SignInPage;
-        //     let modal = Modal.create(SignInModalPage);
-        //     this.nav.present(modal)
-        //   }
-        // }, (error) => {
-        //   console.log(error);
-        // });
       });
     }
   }, {
@@ -126,6 +95,16 @@ var MyApp = (_dec = (0, _ionicAngular.App)({
       // this.menu.open();
       // navigate to the new page if it is not the current page
       this.nav.setRoot(page.component);
+    }
+  }, {
+    key: 'ngOnDestroy',
+    value: function ngOnDestroy() {
+      this.loginEventSubscription.dispose();
+    }
+  }, {
+    key: 'showLogin',
+    value: function showLogin() {
+      this.rootPage = _appLanding.AppLandingPage;
     }
   }]);
 
@@ -146,34 +125,41 @@ var _dec, _class;
 
 var _ionicAngular = require('ionic-angular');
 
+var _authServices = require('../../providers/auth/auth-services');
+
+var _signInModal = require('../sign-in-modal/sign-in-modal');
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-/*
-  Generated class for the AppLandingPage page.
-
-  See http://ionicframework.com/docs/v2/components/#navigation for more info on
-  Ionic pages and navigation.
-*/
 var AppLandingPage = exports.AppLandingPage = (_dec = (0, _ionicAngular.Page)({
   templateUrl: 'build/pages/app-landing/app-landing.html'
 }), _dec(_class = function () {
   _createClass(AppLandingPage, null, [{
     key: 'parameters',
     get: function get() {
-      return [[_ionicAngular.NavController]];
+      return [[_ionicAngular.NavController], [_authServices.AuthServices]];
     }
   }]);
 
-  function AppLandingPage(nav) {
+  function AppLandingPage(nav, auth) {
     _classCallCheck(this, AppLandingPage);
 
     this.nav = nav;
+    this.auth = auth;
   }
+
+  _createClass(AppLandingPage, [{
+    key: 'showLogin',
+    value: function showLogin(platform) {
+      var modal = _ionicAngular.Modal.create(_signInModal.SignInModalPage);
+      this.nav.present(modal);
+    }
+  }]);
 
   return AppLandingPage;
 }()) || _class);
 
-},{"ionic-angular":395}],3:[function(require,module,exports){
+},{"../../providers/auth/auth-services":9,"../sign-in-modal/sign-in-modal":5,"ionic-angular":395}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -229,33 +215,31 @@ var _ionicAngular = require('ionic-angular');
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-/*
-  Generated class for the SignInModalPage page.
-
-  See http://ionicframework.com/docs/v2/components/#navigation for more info on
-  Ionic pages and navigation.
-*/
 var SignInModalPage = exports.SignInModalPage = (_dec = (0, _ionicAngular.Page)({
   templateUrl: 'build/pages/sign-in-modal/sign-in-modal.html'
 }), _dec(_class = function () {
   _createClass(SignInModalPage, null, [{
     key: 'parameters',
     get: function get() {
-      return [[_ionicAngular.ViewController]];
+      return [[_ionicAngular.ViewController], [_ionicAngular.NavController]];
     }
   }]);
 
-  function SignInModalPage(viewCtrl) {
+  function SignInModalPage(viewCtrl, nav) {
     _classCallCheck(this, SignInModalPage);
 
     this.viewCtrl = viewCtrl;
+    this.nav = nav;
   }
 
   _createClass(SignInModalPage, [{
-    key: 'close',
-    value: function close() {
+    key: 'dismiss',
+    value: function dismiss() {
       this.viewCtrl.dismiss();
     }
+  }, {
+    key: 'showLoginModalDialog',
+    value: function showLoginModalDialog() {}
   }]);
 
   return SignInModalPage;
@@ -395,9 +379,7 @@ var AuthServices = exports.AuthServices = (_dec = (0, _core.Injectable)(), _dec(
     _classCallCheck(this, AuthServices);
 
     this.principal = principal;
-
-    this._loggedInSource = new _Subject.Subject();
-    this.loggedInSrc = this._loggedInSource.asObservable();
+    this.loginEvent = new _core.EventEmitter();
 
     this._inAppBrowserEvents = {
       loadstart: 'loadstart',
@@ -411,6 +393,11 @@ var AuthServices = exports.AuthServices = (_dec = (0, _core.Injectable)(), _dec(
     key: 'getSigninPlatform',
     value: function getSigninPlatform() {
       return 'Xuid';
+    }
+  }, {
+    key: 'showLoginDialog',
+    value: function showLoginDialog() {
+      this.loginEvent.next();
     }
   }, {
     key: 'showLogin',
@@ -441,15 +428,6 @@ var AuthServices = exports.AuthServices = (_dec = (0, _core.Injectable)(), _dec(
           }
         });
       });
-    }
-  }, {
-    key: 'load',
-    value: function load() {
-      var _this2 = this;
-
-      window.setTimeout(function () {
-        _this2._loggedInSource.next(true);
-      }, 2000);
     }
   }]);
 
