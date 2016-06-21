@@ -45,7 +45,7 @@ class MyApp {
           this.auth.showLoginDialog();
         }
       }, (error) => {
-        console.log(error);
+        // TODO Handle error.
       });
 
     // set our app's pages

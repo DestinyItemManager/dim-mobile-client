@@ -71,7 +71,7 @@ var MyApp = (_dec = (0, _ionicAngular.App)({
         _this.auth.showLoginDialog();
       }
     }, function (error) {
-      console.log(error);
+      // TODO Handle error.
     });
 
     // set our app's pages
@@ -213,6 +213,8 @@ var _dec, _class;
 
 var _ionicAngular = require('ionic-angular');
 
+var _authServices = require('../../providers/auth/auth-services');
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var SignInModalPage = exports.SignInModalPage = (_dec = (0, _ionicAngular.Page)({
@@ -221,15 +223,16 @@ var SignInModalPage = exports.SignInModalPage = (_dec = (0, _ionicAngular.Page)(
   _createClass(SignInModalPage, null, [{
     key: 'parameters',
     get: function get() {
-      return [[_ionicAngular.ViewController], [_ionicAngular.NavController]];
+      return [[_ionicAngular.ViewController], [_ionicAngular.NavController], [_authServices.AuthServices]];
     }
   }]);
 
-  function SignInModalPage(viewCtrl, nav) {
+  function SignInModalPage(viewCtrl, nav, auth) {
     _classCallCheck(this, SignInModalPage);
 
     this.viewCtrl = viewCtrl;
     this.nav = nav;
+    this.auth = auth;
   }
 
   _createClass(SignInModalPage, [{
@@ -239,13 +242,22 @@ var SignInModalPage = exports.SignInModalPage = (_dec = (0, _ionicAngular.Page)(
     }
   }, {
     key: 'showLoginModalDialog',
-    value: function showLoginModalDialog() {}
+    value: function showLoginModalDialog(platform) {
+      var _this = this;
+
+      console.log('clicked');
+
+      var p = this.auth.showLogin(platform).then(function (token) {
+        console.log(token);
+        _this.dismiss();
+      });
+    }
   }]);
 
   return SignInModalPage;
 }()) || _class);
 
-},{"ionic-angular":395}],6:[function(require,module,exports){
+},{"../../providers/auth/auth-services":9,"ionic-angular":395}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -380,19 +392,19 @@ var AuthServices = exports.AuthServices = (_dec = (0, _core.Injectable)(), _dec(
 
     this.principal = principal;
     this.loginEvent = new _core.EventEmitter();
-
-    this._inAppBrowserEvents = {
-      loadstart: 'loadstart',
-      loadstop: 'loadstop',
-      loaderror: 'loaderror',
-      exit: 'exit'
-    };
   }
 
   _createClass(AuthServices, [{
     key: 'getSigninPlatform',
-    value: function getSigninPlatform() {
-      return 'Xuid';
+    value: function getSigninPlatform(platform) {
+      switch (platform.toLowerCase()) {
+        case 'psn':
+          return 'Psnid';
+        case 'xbl':
+          return 'Xuid';
+        default:
+          throw new Error('Invalid platform ID: ' + platform);
+      }
     }
   }, {
     key: 'showLoginDialog',
@@ -402,31 +414,82 @@ var AuthServices = exports.AuthServices = (_dec = (0, _core.Injectable)(), _dec(
   }, {
     key: 'showLogin',
     value: function showLogin(platform) {
-      var _this = this;
+      console.log('showLogin');
 
-      var ref = cordova.InAppBrowser.open('https://www.bungie.net/en/User/SignIn/' + this.getSigninPlatform(platform), '_blank', 'location=yes');
+      var ref = cordova.InAppBrowser.open('https://www.bungie.net/en/User/SignIn/' + this.getSigninPlatform(platform), '_blank', 'location=yes,hidden=yes,clearcache=yes,clearsessioncache=yes');
 
-      // Attempts to get a cookie from each page load in the browser reference.
-      ref.addEventListener('loadstop', function () {
-        ref.executeScript({ code: 'document.cookie' }, function (result) {
-          var token = '';
+      return new Promise(function (resolve, reject) {
+        console.log('new Promise');
 
-          if (!_.isEmpty(result)) {
-            var cookie = cookieParser.parse(result[0]);
+        var resolved = false;
 
-            if (_.has(cookie, 'bungled')) {
-              token = cookie.bungled;
-              _this.principal.authenticate(new _bungieIdentity.BungieIdentity(token));
-              console.log(token);
-            }
-          }
-
-          if (_.size(token) > 0) {
-            ref.close();
-          } else {
-            ref.show();
-          }
+        ref.addEventListener('exit', function (result) {
+          console.log('exit', result);
         });
+
+        ref.addEventListener('loaderror', function (result) {
+          console.log('loaderror', result);
+        });
+
+        ref.addEventListener('loadstop', function (result) {
+          console.log('loadstop', result);
+
+          ref.executeScript({ code: 'document.cookie' }, function (result) {
+            console.log('executeScript', result);
+
+            var token = '';
+
+            if (!_.isEmpty(result)) {
+              var cookie = cookieParser.parse(result[0]);
+
+              if (_.has(cookie, 'bungled')) {
+                token = cookie.bungled;
+                // this.principal.authenticate(new BungieIdentity(token));
+              }
+            }
+
+            if (_.size(token) > 0) {
+              if (!resolved) {
+                resolve(token);
+                resolved = true;
+              }
+            } else {
+              ref.show();
+            }
+          });
+        });
+
+        // Attempts to get a cookie from each page load in the browser reference.
+        ref.addEventListener('loadstart', function (result) {
+          console.log('loadstart', result);
+
+          ref.executeScript({ code: 'document.cookie' }, function (result) {
+            console.log('executeScript', result);
+
+            var token = '';
+
+            if (!_.isEmpty(result)) {
+              var cookie = cookieParser.parse(result[0]);
+
+              if (_.has(cookie, 'bungled')) {
+                token = cookie.bungled;
+                // this.principal.authenticate(new BungieIdentity(token));
+              }
+            }
+
+            if (_.size(token) > 0) {
+              if (!resolved) {
+                resolve(token);
+                resolved = true;
+              }
+            }
+          });
+        });
+      }).then(function (token) {
+        ref.close();
+        ref = undefined;
+
+        return token;
       });
     }
   }]);
@@ -530,13 +593,6 @@ var DimPrincipal = exports.DimPrincipal = (_dec = (0, _core.Injectable)(), _dec(
     this._storage = new _ionicAngular.Storage(_ionicAngular.SqlStorage);
     this._authenticated = false;
     this._identity = null;
-
-    this._inAppBrowserEvents = {
-      loadstart: 'loadstart',
-      loadstop: 'loadstop',
-      loaderror: 'loaderror',
-      exit: 'exit'
-    };
   }
 
   /*
@@ -591,8 +647,6 @@ var DimPrincipal = exports.DimPrincipal = (_dec = (0, _core.Injectable)(), _dec(
         var test_identity_service = new _destinyServices.DestinyServices(this._http);
         test_identity_service.token = identity.token;
         test_identity_service.getBungieNetUser().then(function (result) {
-          console.log(result);
-
           if (result.ErrorCode === 1) {
             _this2._authenticated = true;
             _this2._identity._data = result.Response;
@@ -633,7 +687,6 @@ var DimPrincipal = exports.DimPrincipal = (_dec = (0, _core.Injectable)(), _dec(
           if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
         }
       }).then(function (token) {
-        console.log(token);
         return token;
       }).catch(function (error) {
         throw error;
@@ -650,7 +703,7 @@ var DimPrincipal = exports.DimPrincipal = (_dec = (0, _core.Injectable)(), _dec(
           var ref = cordova.InAppBrowser.open('https://www.bungie.net/help', '_blank', 'location=no,hidden=yes');
 
           // When the page has stopped loading...
-          ref.addEventListener(self._inAppBrowserEvents.loadstop, function (event) {
+          ref.addEventListener('loadstop', function (event) {
             // Attempt to get the cookie...
             ref.executeScript({ code: 'document.cookie' }, function (result) {
               // If successful, we should have a cookie in the result.
@@ -680,7 +733,7 @@ var DimPrincipal = exports.DimPrincipal = (_dec = (0, _core.Injectable)(), _dec(
             });
           });
 
-          ref.addEventListener(self._inAppBrowserEvents.loaderror, function (event) {
+          ref.addEventListener('loaderror', function (event) {
             reject('');
 
             if (!_.isUndefined(ref)) {

@@ -14,17 +14,17 @@ export class AuthServices {
   constructor(principal) {
     this.principal = principal;
     this.loginEvent = new EventEmitter();
-
-    this._inAppBrowserEvents = {
-      loadstart: 'loadstart',
-      loadstop: 'loadstop',
-      loaderror: 'loaderror',
-      exit: 'exit'
-    };
   }
 
-  getSigninPlatform() {
-    return 'Xuid';
+  getSigninPlatform(platform) {
+    switch (platform.toLowerCase()) {
+      case 'psn':
+        return 'Psnid';
+      case 'xbl':
+        return 'Xuid';
+      default:
+        throw new Error(`Invalid platform ID: ${ platform }`);
+    }
   }
 
   showLoginDialog() {
@@ -33,31 +33,87 @@ export class AuthServices {
 
 
   showLogin(platform) {
-    let ref = cordova.InAppBrowser.open(`https://www.bungie.net/en/User/SignIn/${ this.getSigninPlatform(platform) }`, '_blank', 'location=yes');
+    console.log('showLogin');
 
-    // Attempts to get a cookie from each page load in the browser reference.
-    ref.addEventListener('loadstop', () => {
-      ref.executeScript({ code: 'document.cookie' },
-        (result) => {
-          let token = '';
+    let ref = cordova.InAppBrowser.open(`https://www.bungie.net/en/User/SignIn/${ this.getSigninPlatform(platform) }`, '_blank', 'location=yes,hidden=yes,clearcache=yes,clearsessioncache=yes');
 
-          if (!_.isEmpty(result)) {
-            let cookie = cookieParser.parse(result[0]);
+    return new Promise((resolve, reject) => {
+      console.log('new Promise');
 
-            if (_.has(cookie, 'bungled')) {
-              token = cookie.bungled;
-              this.principal.authenticate(new BungieIdentity(token));
-              console.log(token);
+      let resolved = false;
+
+      ref.addEventListener('exit', (result) => {
+        console.log('exit', result);
+      });
+
+      ref.addEventListener('loaderror', (result) => {
+        console.log('loaderror', result);
+      });
+
+      ref.addEventListener('loadstop', (result) => {
+        console.log('loadstop', result);
+
+        ref.executeScript({ code: 'document.cookie' },
+          (result) => {
+            console.log('executeScript', result);
+
+            let token = '';
+
+            if (!_.isEmpty(result)) {
+              let cookie = cookieParser.parse(result[0]);
+
+              if (_.has(cookie, 'bungled')) {
+                token = cookie.bungled;
+                // this.principal.authenticate(new BungieIdentity(token));
+              }
+            }
+
+            if (_.size(token) > 0) {
+              if (!resolved) {
+                resolve(token);
+                resolved = true;
+              }
+            } else {
+              ref.show();
             }
           }
+        );
+      });
 
-          if (_.size(token) > 0) {
-            ref.close();
-          } else {
-            ref.show();
+      // Attempts to get a cookie from each page load in the browser reference.
+      ref.addEventListener('loadstart', (result) => {
+        console.log('loadstart', result);
+
+        ref.executeScript({ code: 'document.cookie' },
+          (result) => {
+            console.log('executeScript', result);
+
+            let token = '';
+
+            if (!_.isEmpty(result)) {
+              let cookie = cookieParser.parse(result[0]);
+
+              if (_.has(cookie, 'bungled')) {
+                token = cookie.bungled;
+                // this.principal.authenticate(new BungieIdentity(token));
+              }
+            }
+
+            if (_.size(token) > 0) {
+              if (!resolved) {
+                resolve(token);
+                resolved = true;
+              }
+            }
           }
-        }
-      );
+        );
+      });
+    })
+    .then((token) => {
+      ref.close();
+      ref = undefined;
+
+      return token;
     });
   }
 }

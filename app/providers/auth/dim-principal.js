@@ -19,13 +19,6 @@ export class DimPrincipal {
     this._storage = new Storage(SqlStorage);
     this._authenticated = false;
     this._identity = null;
-
-    this._inAppBrowserEvents = {
-      loadstart: 'loadstart',
-      loadstop: 'loadstop',
-      loaderror: 'loaderror',
-      exit: 'exit'
-    };
   }
 
   /*
@@ -85,8 +78,6 @@ export class DimPrincipal {
       test_identity_service.token = identity.token;
       test_identity_service.getBungieNetUser()
         .then((result) => {
-          console.log(result);
-
           if (result.ErrorCode === 1) {
             this._authenticated = true;
             this._identity._data = result.Response;
@@ -124,7 +115,6 @@ export class DimPrincipal {
         }
       })
       .then((token) => {
-        console.log(token);
         return token;
       })
       .catch((error) => {
@@ -142,39 +132,38 @@ export class DimPrincipal {
           let ref = cordova.InAppBrowser.open('https://www.bungie.net/help', '_blank', 'location=no,hidden=yes');
 
           // When the page has stopped loading...
-          ref.addEventListener(self._inAppBrowserEvents.loadstop,
-            (event) => {
-              // Attempt to get the cookie...
-              ref.executeScript({ code: 'document.cookie' },
-                (result) => {
-                  // If successful, we should have a cookie in the result.
-                  try {
-                    if (!_.isEmpty(result)) {
-                      let cookie = cookieParser.parse(result[0]);
+          ref.addEventListener('loadstop', (event) => {
+            // Attempt to get the cookie...
+            ref.executeScript({ code: 'document.cookie' },
+              (result) => {
+                // If successful, we should have a cookie in the result.
+                try {
+                  if (!_.isEmpty(result)) {
+                    let cookie = cookieParser.parse(result[0]);
 
-                      if (_.has(cookie, 'bungled')) {
-                        resolve(cookie.bungled);
-                      } else {
-                        // Cookie did not contain a bungled token. Unexepected...
-                        reject('');
-                      }
+                    if (_.has(cookie, 'bungled')) {
+                      resolve(cookie.bungled);
                     } else {
-                      // No result was returned from executeScript. Unexepected...
+                      // Cookie did not contain a bungled token. Unexepected...
                       reject('');
                     }
-                  } catch (e) {
-                    // Very unexepected...
+                  } else {
+                    // No result was returned from executeScript. Unexepected...
                     reject('');
-                  } finally {
-                    if (!_.isUndefined(ref)) {
-                      ref.close();
-                      ref = undefined;
-                    }
                   }
-                });
-            });
+                } catch (e) {
+                  // Very unexepected...
+                  reject('');
+                } finally {
+                  if (!_.isUndefined(ref)) {
+                    ref.close();
+                    ref = undefined;
+                  }
+                }
+              });
+          });
 
-          ref.addEventListener(self._inAppBrowserEvents.loaderror, (event) => {
+          ref.addEventListener('loaderror', (event) => {
             reject('');
 
             if (!_.isUndefined(ref)) {
