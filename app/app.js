@@ -40,7 +40,7 @@ class MyApp {
     this.auth.principal.identity()
       .then((response) => {
         if (this.auth.principal.isAuthenticated) {
-          this.rootPage = ItemsPage;
+          this.rootPage = AppLandingPage;
         } else {
           this.auth.showLoginDialog();
         }
@@ -78,6 +78,6 @@ class MyApp {
   }
 
   showLogin() {
-    this.rootPage = AppLandingPage;
+    this.rootPage = SignInPage;
   }
 }

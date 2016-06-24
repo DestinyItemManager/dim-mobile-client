@@ -66,7 +66,7 @@ var MyApp = (_dec = (0, _ionicAngular.App)({
     // Check to see if the user has previously logged into Bungie.net
     this.auth.principal.identity().then(function (response) {
       if (_this.auth.principal.isAuthenticated) {
-        _this.rootPage = _items.ItemsPage;
+        _this.rootPage = _appLanding.AppLandingPage;
       } else {
         _this.auth.showLoginDialog();
       }
@@ -104,7 +104,7 @@ var MyApp = (_dec = (0, _ionicAngular.App)({
   }, {
     key: 'showLogin',
     value: function showLogin() {
-      this.rootPage = _appLanding.AppLandingPage;
+      this.rootPage = _signIn.SignInPage;
     }
   }]);
 
@@ -149,11 +149,11 @@ var AppLandingPage = exports.AppLandingPage = (_dec = (0, _ionicAngular.Page)({
   }
 
   _createClass(AppLandingPage, [{
-    key: 'showLogin',
-    value: function showLogin(platform) {
-      var modal = _ionicAngular.Modal.create(_signInModal.SignInModalPage);
-      this.nav.present(modal);
-    }
+    key: 'logout',
+    value: function logout() {}
+  }, {
+    key: 'login',
+    value: function login() {}
   }]);
 
   return AppLandingPage;
@@ -215,6 +215,10 @@ var _ionicAngular = require('ionic-angular');
 
 var _authServices = require('../../providers/auth/auth-services');
 
+var _appLanding = require('../app-landing/app-landing');
+
+var _bungieIdentity = require('../../providers/auth/bungie-identity');
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var SignInModalPage = exports.SignInModalPage = (_dec = (0, _ionicAngular.Page)({
@@ -247,9 +251,15 @@ var SignInModalPage = exports.SignInModalPage = (_dec = (0, _ionicAngular.Page)(
 
       console.log('clicked');
 
-      var p = this.auth.showLogin(platform).then(function (token) {
-        console.log(token);
-        _this.dismiss();
+      var p = this.auth.login(platform).then(function (token) {
+        if (token) {
+          _this.auth.principal.authenticate(token);
+
+          _this.dismiss();
+          _this.nav.setRoot(_appLanding.AppLandingPage);
+        } else {
+          // Show error.
+        }
       });
     }
   }]);
@@ -257,11 +267,11 @@ var SignInModalPage = exports.SignInModalPage = (_dec = (0, _ionicAngular.Page)(
   return SignInModalPage;
 }()) || _class);
 
-},{"../../providers/auth/auth-services":9,"ionic-angular":395}],6:[function(require,module,exports){
+},{"../../providers/auth/auth-services":9,"../../providers/auth/bungie-identity":10,"../app-landing/app-landing":2,"ionic-angular":395}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 exports.SignInPage = undefined;
 
@@ -271,28 +281,41 @@ var _dec, _class;
 
 var _ionicAngular = require('ionic-angular');
 
+var _authServices = require('../../providers/auth/auth-services');
+
+var _signInModal = require('../sign-in-modal/sign-in-modal');
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var SignInPage = exports.SignInPage = (_dec = (0, _ionicAngular.Page)({
-    templateUrl: 'build/pages/sign-in/sign-in.html'
+  templateUrl: 'build/pages/sign-in/sign-in.html'
 }), _dec(_class = function () {
-    _createClass(SignInPage, null, [{
-        key: 'parameters',
-        get: function get() {
-            return [[_ionicAngular.NavController]];
-        }
-    }]);
-
-    function SignInPage(nav) {
-        _classCallCheck(this, SignInPage);
-
-        this.nav = nav;
+  _createClass(SignInPage, null, [{
+    key: 'parameters',
+    get: function get() {
+      return [[_ionicAngular.NavController], [_authServices.AuthServices]];
     }
+  }]);
 
-    return SignInPage;
+  function SignInPage(nav, auth) {
+    _classCallCheck(this, SignInPage);
+
+    this.nav = nav;
+    this.auth = auth;
+  }
+
+  _createClass(SignInPage, [{
+    key: 'showLogin',
+    value: function showLogin(platform) {
+      var modal = _ionicAngular.Modal.create(_signInModal.SignInModalPage);
+      this.nav.present(modal);
+    }
+  }]);
+
+  return SignInPage;
 }()) || _class);
 
-},{"ionic-angular":395}],7:[function(require,module,exports){
+},{"../../providers/auth/auth-services":9,"../sign-in-modal/sign-in-modal":5,"ionic-angular":395}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -395,8 +418,8 @@ var AuthServices = exports.AuthServices = (_dec = (0, _core.Injectable)(), _dec(
   }
 
   _createClass(AuthServices, [{
-    key: 'getSigninPlatform',
-    value: function getSigninPlatform(platform) {
+    key: '_getSigninPlatform',
+    value: function _getSigninPlatform(platform) {
       switch (platform.toLowerCase()) {
         case 'psn':
           return 'Psnid';
@@ -412,15 +435,11 @@ var AuthServices = exports.AuthServices = (_dec = (0, _core.Injectable)(), _dec(
       this.loginEvent.next();
     }
   }, {
-    key: 'showLogin',
-    value: function showLogin(platform) {
-      console.log('showLogin');
-
-      var ref = cordova.InAppBrowser.open('https://www.bungie.net/en/User/SignIn/' + this.getSigninPlatform(platform), '_blank', 'location=yes,hidden=yes,clearcache=yes,clearsessioncache=yes');
+    key: '_getTokenFromBungieNet',
+    value: function _getTokenFromBungieNet(platform) {
+      var ref = cordova.InAppBrowser.open('https://www.bungie.net/en/User/SignIn/' + this._getSigninPlatform(platform), '_blank', 'location=yes,hidden=yes,clearcache=yes,clearsessioncache=yes');
 
       return new Promise(function (resolve, reject) {
-        console.log('new Promise');
-
         var resolved = false;
 
         ref.addEventListener('exit', function (result) {
@@ -432,11 +451,7 @@ var AuthServices = exports.AuthServices = (_dec = (0, _core.Injectable)(), _dec(
         });
 
         ref.addEventListener('loadstop', function (result) {
-          console.log('loadstop', result);
-
           ref.executeScript({ code: 'document.cookie' }, function (result) {
-            console.log('executeScript', result);
-
             var token = '';
 
             if (!_.isEmpty(result)) {
@@ -460,16 +475,12 @@ var AuthServices = exports.AuthServices = (_dec = (0, _core.Injectable)(), _dec(
         });
 
         // Attempts to get a cookie from each page load in the browser reference.
-        ref.addEventListener('loadstart', function (result) {
-          console.log('loadstart', result);
-
-          ref.executeScript({ code: 'document.cookie' }, function (result) {
-            console.log('executeScript', result);
-
+        ref.addEventListener('loadstart', function (startResult) {
+          ref.executeScript({ code: 'document.cookie' }, function (scriptResult) {
             var token = '';
 
-            if (!_.isEmpty(result)) {
-              var cookie = cookieParser.parse(result[0]);
+            if (!_.isEmpty(scriptResult)) {
+              var cookie = cookieParser.parse(scriptResult[0]);
 
               if (_.has(cookie, 'bungled')) {
                 token = cookie.bungled;
@@ -491,6 +502,11 @@ var AuthServices = exports.AuthServices = (_dec = (0, _core.Injectable)(), _dec(
 
         return token;
       });
+    }
+  }, {
+    key: 'login',
+    value: function login(platform) {
+      return this._getTokenFromBungieNet(platform);
     }
   }]);
 
@@ -623,7 +639,7 @@ var DimPrincipal = exports.DimPrincipal = (_dec = (0, _core.Injectable)(), _dec(
 
       return this.getBungleToken().then(function (token) {
         if (_.isString(token) && _.size(token) > 0) {
-          _this.authenticate(new _bungieIdentity.BungieIdentity(token));
+          _this.authenticate(token);
         } else {
           _this.authenticate(null);
         }
@@ -636,20 +652,19 @@ var DimPrincipal = exports.DimPrincipal = (_dec = (0, _core.Injectable)(), _dec(
     }
   }, {
     key: 'authenticate',
-    value: function authenticate(identity) {
+    value: function authenticate(token) {
       var _this2 = this;
 
-      var hasToken = _.isString(identity.token) && _.size(identity.token) > 0;
+      var hasToken = _.isString(token) && _.size(token) > 0;
 
       if (hasToken) {
         this._authenticated = false;
-        this._identity = identity;
         var test_identity_service = new _destinyServices.DestinyServices(this._http);
-        test_identity_service.token = identity.token;
+        test_identity_service.token = token;
         test_identity_service.getBungieNetUser().then(function (result) {
           if (result.ErrorCode === 1) {
             _this2._authenticated = true;
-            _this2._identity._data = result.Response;
+            _this2._identity = new _bungieIdentity.BungieIdentity(token, result.Response);
           }
         });
       } else {

@@ -55,7 +55,7 @@ export class DimPrincipal {
     return this.getBungleToken()
       .then((token) => {
         if (_.isString(token) && _.size(token) > 0) {
-          this.authenticate(new BungieIdentity(token));
+          this.authenticate(token);
         } else {
           this.authenticate(null);
         }
@@ -68,19 +68,18 @@ export class DimPrincipal {
       });
   }
 
-  authenticate(identity) {
-    let hasToken = (_.isString(identity.token) && _.size(identity.token) > 0);
+  authenticate(token) {
+    let hasToken = (_.isString(token) && _.size(token) > 0);
 
     if (hasToken) {
       this._authenticated = false;
-      this._identity = identity;
       let test_identity_service = new DestinyServices(this._http);
-      test_identity_service.token = identity.token;
+      test_identity_service.token = token;
       test_identity_service.getBungieNetUser()
         .then((result) => {
           if (result.ErrorCode === 1) {
             this._authenticated = true;
-            this._identity._data = result.Response;
+            this._identity = new BungieIdentity(token, result.Response);
           }
         });
     } else {

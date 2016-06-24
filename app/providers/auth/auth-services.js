@@ -16,7 +16,7 @@ export class AuthServices {
     this.loginEvent = new EventEmitter();
   }
 
-  getSigninPlatform(platform) {
+  _getSigninPlatform(platform) {
     switch (platform.toLowerCase()) {
       case 'psn':
         return 'Psnid';
@@ -31,36 +31,53 @@ export class AuthServices {
     this.loginEvent.next();
   }
 
-
-  showLogin(platform) {
-    console.log('showLogin');
-
-    let ref = cordova.InAppBrowser.open(`https://www.bungie.net/en/User/SignIn/${ this.getSigninPlatform(platform) }`, '_blank', 'location=yes,hidden=yes,clearcache=yes,clearsessioncache=yes');
+  _getTokenFromBungieNet(platform) {
+    let ref = cordova.InAppBrowser.open(`https://www.bungie.net/en/User/SignIn/${ this._getSigninPlatform(platform) }`, '_blank', 'location=yes,hidden=yes,clearcache=yes,clearsessioncache=yes');
 
     return new Promise((resolve, reject) => {
-      console.log('new Promise');
+        let resolved = false;
 
-      let resolved = false;
+        ref.addEventListener('exit', (result) => {
+          console.log('exit', result);
+        });
 
-      ref.addEventListener('exit', (result) => {
-        console.log('exit', result);
-      });
+        ref.addEventListener('loaderror', (result) => {
+          console.log('loaderror', result);
+        });
 
-      ref.addEventListener('loaderror', (result) => {
-        console.log('loaderror', result);
-      });
+        ref.addEventListener('loadstop', (result) => {
+          ref.executeScript({ code: 'document.cookie' },
+            (result) => {
+              let token = '';
 
-      ref.addEventListener('loadstop', (result) => {
-        console.log('loadstop', result);
+              if (!_.isEmpty(result)) {
+                let cookie = cookieParser.parse(result[0]);
 
-        ref.executeScript({ code: 'document.cookie' },
-          (result) => {
-            console.log('executeScript', result);
+                if (_.has(cookie, 'bungled')) {
+                  token = cookie.bungled;
+                  // this.principal.authenticate(new BungieIdentity(token));
+                }
+              }
 
+              if (_.size(token) > 0) {
+                if (!resolved) {
+                  resolve(token);
+                  resolved = true;
+                }
+              } else {
+                ref.show();
+              }
+            }
+          );
+        });
+
+        // Attempts to get a cookie from each page load in the browser reference.
+        ref.addEventListener('loadstart', (startResult) => {
+          ref.executeScript({ code: 'document.cookie' }, (scriptResult) => {
             let token = '';
 
-            if (!_.isEmpty(result)) {
-              let cookie = cookieParser.parse(result[0]);
+            if (!_.isEmpty(scriptResult)) {
+              let cookie = cookieParser.parse(scriptResult[0]);
 
               if (_.has(cookie, 'bungled')) {
                 token = cookie.bungled;
@@ -73,47 +90,20 @@ export class AuthServices {
                 resolve(token);
                 resolved = true;
               }
-            } else {
-              ref.show();
             }
-          }
-        );
+          });
+        });
+      })
+      .then((token) => {
+        ref.close();
+        ref = undefined;
+
+        return token;
       });
+  }
 
-      // Attempts to get a cookie from each page load in the browser reference.
-      ref.addEventListener('loadstart', (result) => {
-        console.log('loadstart', result);
 
-        ref.executeScript({ code: 'document.cookie' },
-          (result) => {
-            console.log('executeScript', result);
-
-            let token = '';
-
-            if (!_.isEmpty(result)) {
-              let cookie = cookieParser.parse(result[0]);
-
-              if (_.has(cookie, 'bungled')) {
-                token = cookie.bungled;
-                // this.principal.authenticate(new BungieIdentity(token));
-              }
-            }
-
-            if (_.size(token) > 0) {
-              if (!resolved) {
-                resolve(token);
-                resolved = true;
-              }
-            }
-          }
-        );
-      });
-    })
-    .then((token) => {
-      ref.close();
-      ref = undefined;
-
-      return token;
-    });
+  login(platform) {
+    return this._getTokenFromBungieNet(platform);
   }
 }

@@ -15,8 +15,11 @@ export class AppLandingPage {
     this.auth = auth;
   }
 
-  showLogin(platform) {
-    let modal = Modal.create(SignInModalPage);
-    this.nav.present(modal);
+  logout() {
+
+  }
+
+  login() {
+    
   }
 }
