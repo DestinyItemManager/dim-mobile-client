@@ -6,10 +6,8 @@ typings/
 node_modules/
 platforms/
 plugins/
-www/build
+www/build/
 *.swp
 .DS_Store
 Thumbs.db
 src/**/*.js
-
-www/css/dim.*
