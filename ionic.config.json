@@ -1,5 +1,6 @@
 {
-  "name": "DIM",
+  "name": "ionic2AppJS",
   "app_id": "",
-  "v2": true
+  "v2": true,
+  "typescript": true
 }

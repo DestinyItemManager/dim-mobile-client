@@ -12,11 +12,8 @@
 <ion-content padding>
   <p>Use one of the following login providers you have associated with a <a href="https://www.bungie.net" target="_blank">Bungie.net</a> profile.</p>
   <ion-list>
-    <ion-item (click)="showLoginModalDialog('psn')">
-      Playstation Network <ion-icon name="logo-playstation" item-right></ion-icon>
-    </ion-item>
-    <ion-item (click)="showLoginModalDialog('xbl')">
-      Xbox Live <ion-icon name="logo-xbox" item-right></ion-icon>
+    <ion-item *ngFor="let platform of platforms" (click)="showLoginModalDialog(platform.value)">
+      {{ platform.name }} <ion-icon [name]="platform.icon" item-right></ion-icon>
     </ion-item>
   </ion-list>
 </ion-content>
