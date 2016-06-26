@@ -6,7 +6,6 @@ typings/
 node_modules/
 platforms/
 plugins/
-www/build/
 *.swp
 .DS_Store
 Thumbs.db
