@@ -31,6 +31,10 @@
     "tslint": "^3.12.1"
   },
   "name": "dim-mobile-client",
-  "description": "The original item manager for Destiny the game.",
-  "version": "1.0.0"
+  "description": "The original item manager for Destiny.",
+  "version": "1.0.0",
+  "repository": {
+    "git": "https://github.com/DestinyItemManager/dim-mobile-client"
+  },
+  "license": "See license in LICENSE"
 }
