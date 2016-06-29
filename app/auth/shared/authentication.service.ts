@@ -6,7 +6,7 @@ import { DimPrincipal } from "./dim-principal";
 import { BungieIdentity } from "./bungie-identity";
 
 @Injectable()
-export class AuthServices {
+export class AuthenticationService {
   private inAppBrowserRef: InAppBrowserRef = undefined;
   public loginEvent: EventEmitter<Boolean>;
 

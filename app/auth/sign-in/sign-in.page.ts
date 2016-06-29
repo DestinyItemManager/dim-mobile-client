@@ -1,14 +1,14 @@
 import { Page, Modal, NavController } from "ionic-angular";
-import { AuthServices } from "../../providers/auth/auth-services";
-import { SignInModalPage } from "../sign-in-modal/sign-in-modal";
+import { AuthenticationService } from "../../auth/shared/authentication.service";
+import { SignInModalPage } from "../sign-in-modal/sign-in-modal.page";
 
 @Page({
-  templateUrl: "build/pages/sign-in/sign-in.html",
+  templateUrl: "build/auth/sign-in/sign-in.html",
 })
 export class SignInPage {
   constructor(
     private nav: NavController,
-    private auth: AuthServices
+    private auth: AuthenticationService
   ) {
 
   }

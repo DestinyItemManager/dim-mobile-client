@@ -1,11 +1,11 @@
-import {Component} from "@angular/core";
-import { Modal, NavController, Page, ViewController } from "ionic-angular";
-import { AuthServices } from "../../providers/auth/auth-services";
-import { AppLandingPage } from "../app-landing/app-landing";
-import { BungieIdentity } from "../../providers/auth/bungie-identity";
+import { Component } from "@angular/core";
+import { Modal, NavController, ViewController } from "ionic-angular";
+import { AuthenticationService } from "../shared/authentication.service";
+import { AppLandingPage } from "../../app-landing/app-landing.page";
+import { BungieIdentity } from "../shared/bungie-identity";
 
 @Component({
-  templateUrl: "build/pages/sign-in-modal/sign-in-modal.html",
+  templateUrl: "build/auth/sign-in-modal/sign-in-modal.html",
 })
 export class SignInModalPage {
   private platforms: Array<any>;
@@ -13,7 +13,7 @@ export class SignInModalPage {
   constructor(
     private viewCtrl: ViewController,
     private nav: NavController,
-    private auth: AuthServices
+    private auth: AuthenticationService
   ) {
     this.platforms = [
       {

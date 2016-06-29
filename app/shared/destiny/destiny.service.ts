@@ -3,20 +3,17 @@ import { Headers, Http, RequestMethod, RequestOptions } from "@angular/http";
 import * as _ from "lodash";
 import "rxjs/add/operator/map";
 import "rxjs/add/operator/toPromise";
-import { DimPrincipal } from "../auth/dim-principal";
 
 @Injectable()
-export class DestinyServices {
+export class DestinyService {
   private apiKey: string;
-  public token: string;
   public data: any;
 
   constructor(
     private http: Http,
-    private principal: DimPrincipal = null
+    public token: string = ""
   ) {
     this.apiKey = "57c5ff5864634503a0340ffdfbeb20c0";
-    this.token = "";
     this.data = null;
   }
 
@@ -25,11 +22,6 @@ export class DestinyServices {
       return new Promise((resolve) => {
         resolve(this.token);
       });
-    } else if (this.principal.hasIdentity) {
-      return this.principal.getIdentity(false)
-        .then((identity) => {
-          return identity.token;
-        });
     } else {
       return new Promise((resolve, reject) => {
         reject("There is no token available.");

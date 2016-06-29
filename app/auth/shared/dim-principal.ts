@@ -1,11 +1,11 @@
 import { Injectable } from "@angular/core";
-import { Platform, Storage, SqlStorage } from "ionic-angular";
 import { Http } from "@angular/http";
-import { InAppBrowser } from "ionic-native";
-import "rxjs/add/operator/map";
-import * as _ from "lodash";
 import * as cookie from "cookie";
-import { DestinyServices } from "../destiny-services/destiny-services";
+import { Platform, Storage, SqlStorage } from "ionic-angular";
+import { InAppBrowser } from "ionic-native";
+import * as _ from "lodash";
+import "rxjs/add/operator/map";
+import { DestinyService } from "../../shared/destiny/destiny.service";
 import { BungieIdentity } from "./bungie-identity";
 
 @Injectable()
@@ -79,14 +79,17 @@ export class DimPrincipal {
 
     if (hastoken) {
       this.authenticated = false;
-      let testidentity_service = new DestinyServices(this.http);
-      testidentity_service.token = token;
+      let testidentity_service = new DestinyService(this.http, token);
       testidentity_service.getBungieNetUser()
         .then((result: any) => {
           if (result.ErrorCode === 1) {
             this.authenticated = true;
             this.identity = new BungieIdentity(token, result.Response);
           }
+        })
+        .catch((error) => {
+            this.authenticated = false;
+            this.identity = null;
         });
     } else {
       this.authenticated = false;

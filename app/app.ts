@@ -1,15 +1,20 @@
 import { Component, ViewChild, EventEmitter } from "@angular/core";
+import { provideStore } from "@ngrx/store";
 import { ionicBootstrap, Platform, MenuController, Nav } from "ionic-angular";
 import { StatusBar } from "ionic-native";
-import { DestinyServices } from "./providers/destiny-services/destiny-services";
-import { DimPrincipal } from "./providers/auth/dim-principal";
-import { AuthServices } from "./providers/auth/auth-services";
-import { AppLandingPage } from "./pages/app-landing/app-landing";
-import { SignInPage } from "./pages/sign-in/sign-in";
+import { AppLandingPage } from "./app-landing/app-landing.page";
+import { AuthenticationService } from "./auth/shared/authentication.service";
+import { SignInPage } from "./auth/sign-in/sign-in.page";
+import { DimPrincipal } from "./auth/shared/dim-principal";
+import { DestinyService } from "./shared/destiny/destiny.service";
 
 @Component({
   templateUrl: "build/app.html",
-  providers: [AuthServices, DimPrincipal, DestinyServices]
+  providers: [
+    AuthenticationService,
+    DimPrincipal,
+    DestinyService
+  ]
 })
 class MyApp {
   @ViewChild(Nav) nav: Nav;
@@ -23,11 +28,11 @@ class MyApp {
   constructor(
     private platform: Platform,
     private menu: MenuController,
-    private auth: AuthServices
+    private auth: AuthenticationService
   ) {
     this.initializeApp();
 
-    // Wireup Login Modal w/ event from AuthService
+    // Wireup Login Modal w/ event from AuthenticationService
     this.loginEventSubscription = this.auth.loginEvent.subscribe((data) => {
       this.showLogin();
     });
@@ -79,7 +84,5 @@ class MyApp {
 
 // enableProdMode();
 
-ionicBootstrap(MyApp)
-  .then(success => console.log(`Bootstrap success`))
-  .catch(error => console.log(error));
+ionicBootstrap(MyApp);
 

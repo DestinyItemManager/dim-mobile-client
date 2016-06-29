@@ -1,7 +1,7 @@
 import { Page, NavController } from "ionic-angular";
 
 @Page({
-  templateUrl: "build/pages/app-landing/app-landing.html",
+  templateUrl: "build/app-landing/app-landing.html",
 })
 export class AppLandingPage {
   constructor(
